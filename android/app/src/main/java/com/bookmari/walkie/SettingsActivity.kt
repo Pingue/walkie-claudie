@@ -67,6 +67,10 @@ class SettingsActivity : Activity() {
             save { putString(Mic.PREF, chosen) }
         }
 
+        title(R.string.sec_music)
+        val music = prefs.getString(MusicFocus.PREF, MusicFocus.PAUSE)!!
+        row(R.string.music, getString(R.string.music_sub), action(MusicFocus.label(music))) { save { putString(MusicFocus.PREF, MusicFocus.next(music)) } }
+
         title(R.string.sec_channels)
         switch(R.string.scan, R.string.scan_sub, WalkieService.SCAN, true)
         if (prefs.getBoolean(WalkieService.SCAN, true)) switch(R.string.scan_follow, R.string.scan_follow_sub, WalkieService.FOLLOW, false)

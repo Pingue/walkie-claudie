@@ -24,6 +24,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.provider.Settings
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -118,9 +119,10 @@ class WalkieService : Service() {
         tts = openTts(this) {
             if (prefs.getBoolean(Channels.ANNOUNCE, false)) { // just switched channel
                 prefs.edit().remove(Channels.ANNOUNCE).apply()
-                tts.speak(Channels.spoken(this), TextToSpeech.QUEUE_ADD, null, "channel")
+                speak(Channels.spoken(this), "channel")
             }
         }
+        watchSpeech()
         setStatus(R.string.st_connecting)
         if (prefs.getBoolean(FLOATING, true) && Settings.canDrawOverlays(this)) addButton() // the in-app talk button works regardless
         addEarphone()
@@ -150,7 +152,7 @@ class WalkieService : Service() {
             // step aside for the whole call.
             KeyLog.add("walkie", "audio mode ${audio.mode}") // 1 ringing, 2 call, 3 VoIP; 0 normal
             session?.let { it.playing(!inCall()); it.isActive = !inCall() }
-            if (inCall()) { tts.stop(); recognizer?.cancel(); endListening(); mono?.let { monologue() } }
+            if (inCall()) { stopSpeech(); recognizer?.cancel(); endListening(); mono?.let { monologue() } }
         }
     }
 
@@ -166,6 +168,7 @@ class WalkieService : Service() {
         mono?.stop()
         if (screenOn.isHeld) screenOn.release()
         tts.shutdown()
+        focus.releaseAll()
         sounds.release()
         setStatus(R.string.st_off)
         super.onDestroy()
@@ -321,7 +324,8 @@ class WalkieService : Service() {
         if (mono != null) return monologue() // any talk button ends a monologue
         if (recognizer != null || Talk.listening) return finishListening()
         if (inCall()) return // the call owns the mic and the buttons
-        tts.stop() // talking over a reply interrupts it
+        focus.acquire("rec") // before stopSpeech, so the music doesn't get a moment of focus in between
+        stopSpeech() // talking over a reply interrupts it
         heard = ""
         finishing = false
         errors.clear()
@@ -421,7 +425,10 @@ class WalkieService : Service() {
     /** Picks up a voice changed in VoiceActivity. */
     fun reloadVoice() {
         tts.shutdown()
+        speaking.clear()
+        focus.release("tts")
         tts = openTts(this) {}
+        watchSpeech()
     }
 
     /** Volume key held past the long-press threshold: start talking; [holdEnd] on release sends. */
@@ -453,7 +460,8 @@ class WalkieService : Service() {
             return
         }
         if (android.os.Build.VERSION.SDK_INT < 33 || Talk.listening || inCall()) return beep(R.raw.empty)
-        tts.stop()
+        focus.acquire("rec")
+        stopSpeech()
         muteChimes()
         beep(R.raw.mono_start)
         setListening(true)
@@ -463,6 +471,7 @@ class WalkieService : Service() {
         mono = Monologue(this, { Talk.partial = it; Talk.refresh() }) { text ->
             mono = null
             Mic.close(this)
+            focus.release("rec")
             if (screenOn.isHeld) screenOn.release()
             main.postDelayed(unmuteLater, 1_000)
             setListening(false)
@@ -476,6 +485,7 @@ class WalkieService : Service() {
         recognizer?.destroy()
         recognizer = null
         Mic.close(this)
+        focus.release("rec")
         main.postDelayed(unmuteLater, 1_000) // the closing chime comes a little after
         setListening(false)
     }
@@ -617,7 +627,43 @@ class WalkieService : Service() {
         if (!running) return
         if (inCall()) return run { main.postDelayed({ speakWhenFree(id, text, chirp) }, 2_000) }
         beep(chirp)
-        main.postDelayed({ tts.speak(text, TextToSpeech.QUEUE_ADD, null, id) }, 400)
+        main.postDelayed({ speak(text, id) }, 400)
+    }
+
+    // --- speech out: the music is held (paused or ducked) while any utterance is queued or playing ---
+
+    private val focus by lazy {
+        MusicFocus(MusicFocus.Android(this)) { prefs.getString(MusicFocus.PREF, MusicFocus.PAUSE)!! }
+    }
+    private val speaking = HashSet<String>() // utterance ids not finished yet; main thread only
+
+    private fun speak(text: String, id: String) {
+        speaking.add(id)
+        focus.acquire("tts")
+        if (tts.speak(text, TextToSpeech.QUEUE_ADD, null, id) != TextToSpeech.SUCCESS) finishedSpeaking(id) // no callbacks will come
+    }
+
+    private fun finishedSpeaking(id: String?) {
+        if (id != null && speaking.remove(id) && speaking.isEmpty()) focus.release("tts")
+    }
+
+    private fun stopSpeech() {
+        tts.stop()
+        speaking.clear() // late callbacks for the flushed utterances no longer count
+        focus.release("tts")
+    }
+
+    /** Gives the music back once the last queued utterance has finished (or failed). */
+    private fun watchSpeech() {
+        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            // Engine callbacks arrive on a binder thread.
+            private fun finished(id: String?) { main.post { finishedSpeaking(id) } }
+            override fun onStart(utteranceId: String?) {}
+            override fun onDone(utteranceId: String?) = finished(utteranceId)
+            override fun onStop(utteranceId: String?, interrupted: Boolean) = finished(utteranceId)
+            @Deprecated("Deprecated in Java")
+            override fun onError(utteranceId: String?) = finished(utteranceId)
+        })
     }
 
     private fun beep(res: Int) { sounds.play(soundIds[res] ?: return, 1f, 1f, 1, 0, 1f) }
