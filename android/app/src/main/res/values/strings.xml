@@ -118,4 +118,10 @@
     <string name="mic_headset">Headset</string>
     <string name="mic_bt_denied">Without the Bluetooth permission only wired and USB headset mics can be used; a Bluetooth headset falls back to the default mic.</string>
     <string name="mic_sub">Tap to switch: Auto (system default), Phone (built-in mic), Headset (wired, USB or Bluetooth). Falls back to the default if the headset isn\'t connected</string>
+    <string name="sec_music">Music</string>
+    <string name="music">While talking or listening</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_duck">Duck</string>
+    <string name="music_off">Off</string>
+    <string name="music_sub">Tap to switch: Pause (music stops, then resumes), Duck (music gets quieter), Off. Applies while you record and while a reply is read aloud</string>
 </resources>
