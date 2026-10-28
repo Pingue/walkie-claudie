@@ -542,13 +542,14 @@ class WalkieService : Service() {
 
     @Volatile private var sentBeepAt = 0L
     private val RECEIVED_GAP_MS = 1_200L // after the "sent" beep; 0.7 s still sounded run together on a real phone (10/9)
+    private val SENT_BEEP_DELAY_MS = 500L // a beat between the end of recording and the "sent" beep
 
     private fun send(text: String) {
         val line = Talk.Line(UUID.randomUUID().toString(), text, Talk.State.SENDING)
         Talk.lines.add(line)
         Talk.changed()
-        beep(R.raw.sent)
-        sentBeepAt = android.os.SystemClock.uptimeMillis()
+        main.postDelayed({ if (running) beep(R.raw.sent) }, SENT_BEEP_DELAY_MS)
+        sentBeepAt = android.os.SystemClock.uptimeMillis() + SENT_BEEP_DELAY_MS // when it plays: "received" follows it by RECEIVED_GAP_MS
         outbox.put(line)
     }
 
