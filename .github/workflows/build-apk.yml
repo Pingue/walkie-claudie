@@ -1,10 +1,16 @@
-name: Build APK
+name: Build APK and release
 
+# Every push to main builds an APK. If the commits since the last v* tag call for a release
+# (conventional commits: fix/perf -> patch, feat -> minor, "!" or BREAKING CHANGE -> major),
+# the workflow also tags the commit and publishes a GitHub release with the APK attached.
 on:
   push:
     branches: [main, master]
-    tags: ["v*"]
-  workflow_dispatch:
+  workflow_dispatch: # builds an APK only, never releases
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -13,9 +19,12 @@ jobs:
   apk:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # attach the APK to a GitHub release on tags
+      contents: write # create the tag and release
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tags and full history for the version
+      - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -24,8 +33,31 @@ jobs:
         run: yes | "$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | tail -1)" --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Work out the version
+        id: version
+        run: |
+          bun tools/next-version.ts > "$RUNNER_TEMP/version.json"
+          cat "$RUNNER_TEMP/version.json"
+          jq -r .notes "$RUNNER_TEMP/version.json" > "$RUNNER_TEMP/notes.md"
+          {
+            echo "released=$(jq -r .released "$RUNNER_TEMP/version.json")"
+            echo "version=$(jq -r .version "$RUNNER_TEMP/version.json")"
+            echo "tag=$(jq -r .tag "$RUNNER_TEMP/version.json")"
+            echo "code=$(jq -r .versionCode "$RUNNER_TEMP/version.json")"
+          } >> "$GITHUB_OUTPUT"
+
+      # Only a real release stamps the derived version into the app; other builds keep build.gradle's.
+      - name: Gradle version flags
+        id: flags
+        run: |
+          if [ "${{ steps.version.outputs.released }}" = "true" ]; then
+            echo "args=-Pwalkie.versionName=${{ steps.version.outputs.version }} -Pwalkie.versionCode=${{ steps.version.outputs.code }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build debug APK
-        run: ./gradlew --no-daemon assembleDebug
+        run: ./gradlew --no-daemon assembleDebug ${{ steps.flags.outputs.args }}
         working-directory: android
 
       # Release signing is optional. Add these repository secrets to get a signed release APK;
@@ -41,7 +73,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.WALKIE_KEY_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_B64" ]; then
-            echo "No signing secrets set; skipping the release build."
+            echo "No signing secrets set; skipping the signed release build."
             exit 0
           fi
           dir="$RUNNER_TEMP/keys"
@@ -53,7 +85,7 @@ jobs:
             echo "keyAlias=$KEY_ALIAS"
             echo "keyPassword=$KEY_PASSWORD"
           } > "$dir/keystore.properties"
-          ./gradlew --no-daemon assembleRelease -Pwalkie.keystore="$dir/keystore.properties"
+          ./gradlew --no-daemon assembleRelease -Pwalkie.keystore="$dir/keystore.properties" ${{ steps.flags.outputs.args }}
           echo "built=true" >> "$GITHUB_OUTPUT"
         working-directory: android
 
@@ -70,12 +102,14 @@ jobs:
           path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
-      - name: Attach APK to the release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Tag and publish the release
+        if: github.event_name == 'push' && steps.version.outputs.released == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          if [ -n "$(ls android/app/build/outputs/apk/release/*.apk 2>/dev/null)" ]; then apk=$(ls android/app/build/outputs/apk/release/*.apk)
-          else apk=$(ls android/app/build/outputs/apk/debug/*.apk); fi
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
-          gh release upload "$GITHUB_REF_NAME" $apk --clobber
+          if [ "${{ steps.release.outputs.built }}" = "true" ]; then src=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
+          else src=$(ls android/app/build/outputs/apk/debug/*.apk | head -1); fi # unsigned: the debug-signed APK
+          apk="walkie-claudie-$TAG.apk"
+          cp "$src" "$apk"
+          gh release create "$TAG" "$apk" --target "$GITHUB_SHA" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"

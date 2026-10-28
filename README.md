@@ -108,7 +108,13 @@ Configuration (environment variables):
 - Regenerate the beeps: `python3 tools/sounds.py android/app/src/main/res/raw`
 - Plugin tests: `cd plugin && bun install && bun test`
 - App unit tests: `cd android && ./gradlew testDebugUnitTest`
-- CI: pull requests run both test suites (`.github/workflows/ci.yml`). Pushes to `main` and `v*` tags build an APK (`.github/workflows/build-apk.yml`), downloadable from the run's artifacts, and tags attach it to a release. Add the secrets `WALKIE_KEYSTORE_BASE64`, `WALKIE_STORE_PASSWORD`, `WALKIE_KEY_ALIAS` and `WALKIE_KEY_PASSWORD` to also get a signed release APK.
+- CI: pull requests run both test suites and check that the PR title is a conventional commit (`.github/workflows/ci.yml`).
+- Releases are automatic. Every push to `main` builds an APK (`.github/workflows/build-apk.yml`, downloadable from the run's artifacts). If the [conventional commits](https://www.conventionalcommits.org) since the last `v*` tag call for it, the workflow also picks the next [semver](https://semver.org) version, tags the commit and publishes a GitHub release with the APK attached:
+  - `fix:` / `perf:` / `revert:` → patch, `feat:` → minor, `type!:` or a `BREAKING CHANGE:` footer → major
+  - `docs:`, `chore:`, `ci:`, `test:` and the like don't cause a release
+  - the version is stamped into the app (`versionName`, and `versionCode` = major×10000 + minor×100 + patch); the first release continues from 0.1.1
+  - to get a signed release APK, add the secrets `WALKIE_KEYSTORE_BASE64`, `WALKIE_STORE_PASSWORD`, `WALKIE_KEY_ALIAS` and `WALKIE_KEY_PASSWORD`; without them the release carries the debug-signed APK
+  - the release logic is `tools/next-version.ts` (tests: `bun test tools/`)
 
 ##### Microphone
 Settings › Microphone cycles Auto (Android decides), Phone (built-in mic) and Headset (wired, USB or Bluetooth). If the chosen kind isn't connected, the default is used. Monologue mode honours the choice exactly; the normal talk buttons go through the phone's speech recognizer, which has no device option, so there it is a best-effort routing hint on Android 12+.
