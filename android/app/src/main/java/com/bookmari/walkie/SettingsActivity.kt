@@ -51,6 +51,7 @@ class SettingsActivity : Activity() {
         switch(R.string.trig_volume, R.string.trig_volume_sub, WalkieService.VOLUME, true) { if (!a11yOn()) a11yGuide() }
         if (prefs.getBoolean(WalkieService.VOLUME, true) && !a11yOn())
             row(R.string.a11y_off, getString(R.string.a11y_off_sub), action(R.string.how)) { a11yGuide() }
+        switch(R.string.trig_volume_off, R.string.trig_volume_off_sub, WalkieService.VOLUME_OFF, false)
         // The earphone button is taken back by long-pressing the floating button, so each line says what the other allows.
         val floating = prefs.getBoolean(WalkieService.FLOATING, true)
         val ear = prefs.getBoolean(WalkieService.EAR_SINGLE, true) || prefs.getBoolean(WalkieService.EAR_DOUBLE, false)

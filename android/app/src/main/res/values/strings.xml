@@ -147,4 +147,6 @@
     <string name="mic_dev_bluetooth">Bluetooth headset</string>
     <string name="mic_dev_other">Other input</string>
     <string name="mic_dev_unknown">unknown</string>
+    <string name="trig_volume_off">Volume keys, screen off</string>
+    <string name="trig_volume_off_sub">Experimental. Screen off: press volume down to talk, press again to send. Volume up still raises the volume. Other apps playing audio can take the keys, and some phones ignore it</string>
 </resources>

@@ -136,7 +136,7 @@ Settings › Microphone cycles Auto (Android decides), Phone (built-in mic) and 
 - Main screen: top channel, connection, usage / middle open items / bottom conversation / keys Settings, On/Off, Talk
   - On/Off key light: green on / dark off. While off, the conversation dims and "Off" appears
 - Channel list: tap the top LCD (`CH1 name ›`)
-- Settings: PC address and key, talk buttons on/off, microphone (Auto / Phone / Headset), music (Pause / Duck / Off), channels, voice, mic test, button test
+- Settings: PC address and key, talk buttons on/off (incl. experimental screen-off volume keys), microphone (Auto / Phone / Headset), music (Pause / Duck / Off), channels, voice, mic test, button test
 - Floating button: a small walkie over other apps. Hidden while the app is on screen
   - Light: green connected / red transmitting / blinking red disconnected
 
@@ -148,6 +148,7 @@ Settings › Microphone cycles Auto (Android decides), Phone (built-in mic) and 
    - Floating button: tap the mic → chirp → talk. Short pauses don't cut you off (2 minutes max)
    - Hold volume down: talk while holding. Short presses still change the volume. Screen on only; needs Accessibility ([Permissions and accessibility](#permissions-and-accessibility))
    - Bluetooth earphone button: press once (or twice) to start. Works with the screen off
+   - Experimental, off by default: **Settings › Volume keys, screen off**. With the screen off, press volume down to start talking and press again to send (no holding); volume up still raises the volume. It works by registering as the playing media session, so another app playing audio can take the keys, and some phones don't deliver them. The Button test log shows each press it receives
 3. Send: tap the floating or earphone button again, or release volume down → a beep once the PC has it
 4. Hear the reply: call-alert beep → the reply is read aloud
 5. Turn off: tap Off → two buzzes + falling power tone

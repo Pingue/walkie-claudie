@@ -14,6 +14,7 @@ import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.media.AudioAttributes
 import android.media.SoundPool
+import android.media.VolumeProvider
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
@@ -59,6 +60,7 @@ class WalkieService : Service() {
         const val SCAN = "scan" // listen to every open channel
         const val FOLLOW = "scan_follow" // a reply from another channel makes it the active one
         const val VOLUME = "trig_volume"
+        const val VOLUME_OFF = "trig_volume_off" // experimental: volume down with the screen off
         const val EAR_SINGLE = "trig_ear_single"
         const val EAR_DOUBLE = "trig_ear_double"
         // Voice: engine package ("" = phone default), voice name ("" = best), speech rate.
@@ -260,7 +262,8 @@ class WalkieService : Service() {
             ))
             if (prefs.getBoolean(EAR_DOUBLE, false)) add(KeyEvent.KEYCODE_MEDIA_NEXT)
         }
-        if (keys.isEmpty()) return
+        val volumeOff = prefs.getBoolean(VOLUME_OFF, false)
+        if (keys.isEmpty() && !volumeOff) return
         session = MediaSession(this, "walkie").apply {
             setCallback(object : MediaSession.Callback() {
                 override fun onMediaButtonEvent(intent: Intent): Boolean {
@@ -272,12 +275,41 @@ class WalkieService : Service() {
                     return true
                 }
             })
+            if (volumeOff) setPlaybackToRemote(volumeProvider) // Android sends volume keys to the playing session's provider, also with the screen off
             playing(true)
             isActive = true
         }
         // Taken once at start. A music/podcast app that plays afterwards keeps the earphone button
         // (even paused; user's call 10/8) until the user takes it back: long-press the floating button.
         playSilence()
+    }
+
+    // --- volume keys with the screen off (experimental, see VolumeKeys) ---
+
+    private var lastVolumeEventAt = Long.MIN_VALUE / 2
+    private val volumeProvider by lazy {
+        object : VolumeProvider(VolumeProvider.VOLUME_CONTROL_RELATIVE, 100, musicVolumePercent()) {
+            override fun onAdjustVolume(direction: Int) { main.post { volumeKey(direction) } }
+        }
+    }
+
+    private fun musicVolumePercent() = audio.getStreamVolume(AudioManager.STREAM_MUSIC) * 100 / audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+
+    private fun volumeKey(direction: Int) {
+        val screenOn = getSystemService(android.os.PowerManager::class.java).isInteractive
+        val now = android.os.SystemClock.uptimeMillis()
+        val fresh = VolumeKeys.isFreshPress(now, lastVolumeEventAt)
+        lastVolumeEventAt = now
+        val action = VolumeKeys.action(direction, screenOn, fresh)
+        KeyLog.add("walkie", "volume key via media session: direction=$direction → $action")
+        val flags = if (screenOn) AudioManager.FLAG_SHOW_UI else 0
+        when (action) {
+            VolumeKeys.Action.TOGGLE_TALK -> toggleListening()
+            VolumeKeys.Action.STEP_UP -> audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, flags)
+            VolumeKeys.Action.STEP_DOWN -> audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, flags)
+            VolumeKeys.Action.IGNORE -> {}
+        }
+        volumeProvider.currentVolume = musicVolumePercent() // what the system's volume panel shows for this session
     }
 
     // --- speech in ---
