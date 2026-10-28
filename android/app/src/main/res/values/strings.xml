@@ -68,7 +68,7 @@
     <string name="open">Open</string>
     <string name="clipboard_empty">Nothing copied</string>
     <string name="voice_auto_short">Automatic</string>
-    <string name="trig_volume_sub">Down: talk while held. Up: monologue on/off. Screen on only</string>
+    <string name="trig_volume_sub">Long-press a volume key to run its action (set below). Screen on only</string>
     <string name="trig_ear_single_sub">Playing music hands it to the music app. Long-press the floating button to take it back</string>
     <string name="trig_floating_sub">Tap to talk, long-press to take the earphone button back</string>
     <string name="new_lines">▼ New</string>
@@ -148,5 +148,15 @@
     <string name="mic_dev_other">Other input</string>
     <string name="mic_dev_unknown">unknown</string>
     <string name="trig_volume_off">Volume keys, screen off</string>
-    <string name="trig_volume_off_sub">Experimental. Screen off: press volume down to talk, press again to send. Volume up still raises the volume. Other apps playing audio can take the keys, and some phones ignore it</string>
+    <string name="trig_volume_off_sub">Experimental. With the screen off, the volume keys run the actions above on a single press. Talk hold and monologue need a held key, so they play an error tone. Other apps playing audio can take the keys, and some phones ignore it</string>
+    <string name="vol_down">Volume down</string>
+    <string name="vol_up">Volume up</string>
+    <string name="vol_action_sub">%s · long-press with the screen on</string>
+    <string name="act_default_down">Default (talk hold; screen off: talk toggle)</string>
+    <string name="act_default_up">Default (monologue; screen off: volume)</string>
+    <string name="act_talk_toggle">Talk toggle</string>
+    <string name="act_talk_hold">Talk hold (screen on only)</string>
+    <string name="act_next_channel">Next channel</string>
+    <string name="act_monologue">Monologue (screen on only)</string>
+    <string name="act_volume">Volume only</string>
 </resources>

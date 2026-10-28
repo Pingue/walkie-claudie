@@ -286,7 +286,8 @@ class WalkieService : Service() {
 
     // --- volume keys with the screen off (experimental, see VolumeKeys) ---
 
-    private var lastVolumeEventAt = Long.MIN_VALUE / 2
+    private var lastUpAt = Long.MIN_VALUE / 2
+    private var lastDownAt = Long.MIN_VALUE / 2
     private val volumeProvider by lazy {
         object : VolumeProvider(VolumeProvider.VOLUME_CONTROL_RELATIVE, 100, musicVolumePercent()) {
             override fun onAdjustVolume(direction: Int) { main.post { volumeKey(direction) } }
@@ -298,13 +299,17 @@ class WalkieService : Service() {
     private fun volumeKey(direction: Int) {
         val screenOn = getSystemService(android.os.PowerManager::class.java).isInteractive
         val now = android.os.SystemClock.uptimeMillis()
-        val fresh = VolumeKeys.isFreshPress(now, lastVolumeEventAt)
-        lastVolumeEventAt = now
-        val action = VolumeKeys.action(direction, screenOn, fresh)
+        val up = direction > 0
+        val fresh = VolumeKeys.isFreshPress(now, if (up) lastUpAt else lastDownAt)
+        if (up) lastUpAt = now else lastDownAt = now
+        val configured = VolumeKeys.parse(prefs.getString(if (up) VolumeKeys.PREF_UP else VolumeKeys.PREF_DOWN, null))
+        val action = VolumeKeys.action(configured, direction, screenOn, fresh)
         KeyLog.add("walkie", "volume key via media session: direction=$direction → $action")
         val flags = if (screenOn) AudioManager.FLAG_SHOW_UI else 0
         when (action) {
             VolumeKeys.Action.TOGGLE_TALK -> toggleListening()
+            VolumeKeys.Action.NEXT_CHANNEL -> nextChannel()
+            VolumeKeys.Action.ERROR -> beep(R.raw.failed) // e.g. talk hold: the screen-off path can't see a key being held
             VolumeKeys.Action.STEP_UP -> audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, flags)
             VolumeKeys.Action.STEP_DOWN -> audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, flags)
             VolumeKeys.Action.IGNORE -> {}
@@ -474,6 +479,19 @@ class WalkieService : Service() {
 
     fun holdEnd() = finishListening()
 
+    /** Talk on/off for the volume keys' "talk toggle". */
+    fun talkToggle() = toggleListening()
+
+    /** Moves to the next open channel and reads its name out; nothing to move to (or busy recording) plays the error tone. */
+    fun nextChannel() {
+        val next = Channels.nextPort(Channels.openPorts(this), Channels.port(this))
+        if (next == null || Talk.listening || inCall()) return beep(R.raw.failed)
+        stopSpeech()
+        Channels.follow(this, next)
+        if (polling.add(next)) thread(isDaemon = true, name = "walkie-poll-$next") { pollLoop(next) } // its replies must arrive even with scan off
+        speak(Channels.spoken(this), "channel")
+    }
+
     // --- monologue: volume-up hold starts and ends one long recording (Monologue.kt) ---
 
     private var mono: Monologue? = null
@@ -583,8 +601,10 @@ class WalkieService : Service() {
     }
 
     /** Scan (10/9): every open channel is listened to; other channels' replies play after a switch tone, and talking stays on the active channel. */
+    private val polling: MutableSet<Int> = java.util.Collections.synchronizedSet(mutableSetOf())
+
     private fun scanLoop(listenAll: Boolean) {
-        val polling = mutableSetOf(Channels.port(this))
+        polling.add(Channels.port(this)) // the first poller is started in onCreate
         while (running) {
             Channels.scan(this).filter { listenAll && polling.add(it) }.forEach { thread(isDaemon = true, name = "walkie-poll-$it") { pollLoop(it) } }
             main.post { Talk.refresh() } // names for the header
