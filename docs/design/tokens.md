@@ -1,44 +1,44 @@
-# Walkie-Claudie 디자인 토큰 — B안 '삐삐·계산기 액정' (2026-10-08 사용자 확정)
+# Walkie-Claudie design tokens — option B, "pager / calculator LCD" (confirmed 2026-10-08)
 
-시안: `mockB.html` / `mockB.png` (같은 폴더). 원칙: **실물 기계(삐삐·계산기) 하나를 끝까지 흉내** — 그라데이션·반투명·빛나는 원·둥근 카드 반복 같은 'AI 기본값'은 쓰지 않는다.
+Mock: `mockB.html` / `mockB.png` (same folder). Principle: **imitate one physical machine (a pager or calculator) all the way** — no gradients, translucency, glowing circles, repeated rounded cards or other "AI defaults".
 
-## 색 (8)
-| 토큰 | 값 | 쓰임 |
+## Colour (8)
+| Token | Value | Use |
 |---|---|---|
-| `body` | `#262626` | 기계 몸통(화면 바탕 전체) |
-| `key` | `#3A3A3A` | 고무 버튼 면 |
-| `keyShadow` | `#111111` | 고무 버튼 아래 그림자(3dp, 누르면 0 + 아래로 2dp 이동) |
-| `keyText` | `#D6D6D6` | 버튼 글자 |
-| `lcd` | `#9CA88A` | 액정 바탕 |
-| `ink` | `#1F2818` | 액정 글씨·켜진 칸 |
-| `ghost` | `#1F2818` 12% | 꺼진 칸·액정 격자 무늬(3dp 간격 1px 선) |
-| `ledOk` / `ledRec` | `#7BD36B` / `#C0392B` | 몸통 오른쪽 위 작은 불(7dp): 연결 / 송신 중·끊김(끊김은 깜빡) |
-| `ledDark` | `#1C1C1C` | [켜기/끄기] 버튼 면 오른쪽 위 작은 불(6dp): 켜짐이면 `ledOk`, 꺼짐이면 이 색(10/9 사용자). 켜고 끌 때 진동(켜기 한 번, 끄기 짧게 두 번)과 전원음. 꺼짐이면 대화·남은 일 글씨 30% + 대화 액정 가운데 '꺼짐'(tL) |
+| `body` | `#262626` | machine body (the whole screen background) |
+| `key` | `#3A3A3A` | rubber button face |
+| `keyShadow` | `#111111` | shadow under a rubber button (3dp; when pressed 0, and the button moves down 2dp) |
+| `keyText` | `#D6D6D6` | button text |
+| `lcd` | `#9CA88A` | LCD background |
+| `ink` | `#1F2818` | LCD text and lit cells |
+| `ghost` | `#1F2818` 12% | unlit cells and the LCD grid (1px lines every 3dp) |
+| `ledOk` / `ledRec` | `#7BD36B` / `#C0392B` | small LED at the top right of the body (7dp): connected / transmitting or disconnected (blinks when disconnected) |
+| `ledDark` | `#1C1C1C` | small LED at the top right of the [On/Off] button face (6dp): `ledOk` when on, this colour when off. A buzz on switching (one for on, two short for off) plus the power tone. When off, conversation and open-item text drop to 30% and a centred "Off" (tL) shows on the conversation LCD |
 
-- 액정 안쪽 그림자: 위쪽 2dp, 흐림 5dp, 검정 45%
-- 반전(송신 중): 액정 바탕 `ink`, 글씨 `lcd`, 격자 무늬 없음
+- LCD inner shadow: 2dp at the top, 5dp blur, black 45%
+- Inverted (transmitting): LCD background `ink`, text `lcd`, no grid
 
-## 글자 (3단계, 글꼴 2개)
-| 토큰 | 크기 | 쓰임 |
+## Type (3 sizes, 2 fonts)
+| Token | Size | Use |
 |---|---|---|
-| `tL` | 24sp | 큰 상태("● 송신 중") |
-| `tM` | 15sp | 남은 일·대화·메뉴 항목 |
-| `tS` | 12sp | 머리말(5시간·남은 일 3·연결), 보조 설명 |
-- 글꼴: **NeoDunggeunmo Pro**(홈페이지와 같은 파일, SIL OFL — 앱 assets에 넣고 라이선스 파일 동봉). 숫자·키·주소는 같은 글꼴. 시안대로 대화도 도트 글꼴(읽기 불편하다는 말이 나오면 대화만 시스템 글꼴로 바꾸는 것이 1순위 수정안)
-- 대화: 내 말 `나> ` 60% 진하기, 비서 `비서> ` 100%. 마지막 줄 끝에 깜빡 커서(8×14dp, 1초 주기)
+| `tL` | 24sp | big status ("● TRANSMITTING") |
+| `tM` | 15sp | open items, conversation, menu rows |
+| `tS` | 12sp | headers (5h, open items 3, connection), helper text |
+- Font: **NeoDunggeunmo Pro** (SIL OFL; bundled in the app assets with its licence file). Numbers, keys and addresses use the same font. As in the mock, the conversation is in the pixel font too (if people find it hard to read, switching only the conversation to the system font is the first fix to try)
+- Conversation: your lines `ME> ` at 60% strength, Claude's `CLAUDE> ` at 100%. A blinking cursor (8×14dp, 1 s period) at the end of the last line
 
-## 모양·간격
-- 모서리: 몸통 26dp(화면 전체라 실제론 기기 모서리), 액정 6dp, 고무 버튼 9dp — **이 세 값만**
-- 간격: 4 / 8 / 10 / 16dp (화면 가장자리 16, 칸 사이 10, 칸 안쪽 10·12, 버튼 사이 8)
-- 고무 버튼 높이 44dp, 한 줄에 최대 3개
-- 아래 버튼 [설정][켜기/끄기][말하기]는 글자 대신 도트 그림(조절 막대·전원·마이크 — 톱니는 벌레처럼 보여 바꿈, 송신 중 [취소]는 ✕) — 12칸 안팎, 선 굵기 2칸(조절 막대만 손잡이가 보이게 가는 선 1칸), 한 칸 2.5dp(떠 있는 버튼은 2dp), 점 사이 1px 틈, 누르면 버튼 면과 함께 2dp 내려감, 모두 `keyText`(마이크만 흰색이던 것 맞춤, 10/12 사용자). 켜짐/꺼짐은 버튼 불로 구분. 글자는 화면 읽기용 이름으로만 남김(10/12 사용자)
-- 사용량 칸: 10칸 막대(칸 사이 2dp, 높이 7dp), 켜진 칸 `ink`, 꺼진 칸 `ghost`
-- 안테나: 막대 4개(폭 3dp, 높이 4/7/10/13dp) — 연결 세기 대신 '연결됨=4칸, 재시도 중=1칸 깜빡, 끊김=0칸'
-- 맨 아래 `WALKIE-CLAUDIE` 각인(11sp, `#777`, 자간 2)
+## Shape and spacing
+- Corners: body 26dp (the whole screen, so really the device corner), LCD 6dp, rubber button 9dp — **only these three**
+- Spacing: 4 / 8 / 10 / 16dp (16 at the screen edge, 10 between cells, 10·12 inside a cell, 8 between buttons)
+- Rubber button height 44dp, at most 3 per row
+- The bottom buttons [Settings][On/Off][Talk] use dot-matrix icons instead of text (sliders, power, microphone — a gear looked like a bug, so it was replaced; [Cancel] while transmitting is ✕): about 12 cells wide, strokes 2 cells thick (sliders use a 1-cell line so the knobs show), 2.5dp per cell (2dp for the floating button), 1px gap between dots, sinking 2dp with the button face when pressed, all in `keyText`. On/off is shown by the button's LED. The text stays only as the screen-reader name
+- Usage cell: a 10-cell bar (2dp between cells, 7dp high), lit cells `ink`, unlit cells `ghost`
+- Antenna: 4 bars (3dp wide, 4/7/10/13dp high) — instead of signal strength it shows "connected = 4 bars, retrying = 1 bar blinking, disconnected = 0 bars"
+- `WALKIE-CLAUDIE` engraving at the bottom (11sp, `#777`, letter-spacing 2)
 
-## 화면 상태
-1. 평소: 위 액정(채널·안테나·사용량) / 가운데 액정(남은 일) / 아래 액정(대화, 남는 높이 전부) / 버튼 [설정][끄기][말하기]
-2. 송신 중: 가운데+아래 액정을 하나로 합쳐 반전, "● 송신 중" + "떼면 보내요"(토글 버튼이면 "다시 누르면 보내요") + 알아들은 말 실시간, 버튼 [설정][취소][말하기], 불 빨강
-3. 끊김: 안테나 0칸, 불 빨강 깜빡, 대화 맨 아래 `-- 연결 끊김, 다시 시도 중 --`
-4. 설정: 액정 하나에 메뉴 줄(점선 구분), 켬/끔은 `ON`(반전 칸)/`OFF`(테두리 칸), 버튼 [← 뒤로]
-5. 떠 있는 버튼(다른 앱 위): 작은 무전기 — `body` 몸통(모서리 9dp) 안에 고무 버튼(60×47dp, 글자 대신 도트 마이크 그림(아래 버튼과 같은 그림, 한 칸 2dp), 누르면 버튼이 눌림, 몸통 여백 위 14·나머지 8dp), 몸통 오른쪽 위 작은 불(7dp): 연결 초록 / 송신 중 빨강 / 끊김 빨강 깜빡(10/12 사용자)
+## Screen states
+1. Idle: top LCD (channel, antenna, usage) / middle LCD (open items) / bottom LCD (conversation, all the remaining height) / buttons [Settings][Off][Talk]
+2. Transmitting: middle and bottom LCDs merged and inverted, "● TRANSMITTING" + "Release to send" ("Press again to send" for a toggle button) + live recognised speech, buttons [Settings][Cancel][Talk], red LED
+3. Disconnected: antenna 0 bars, red LED blinking, `-- Disconnected, retrying --` at the bottom of the conversation
+4. Settings: one LCD with menu rows (dotted dividers), on/off as `ON` (inverted cell) / `OFF` (outlined cell), button [← Back]
+5. Floating button (over other apps): a small walkie — a rubber button inside a `body` housing (9dp corners; button 60×47dp, a dot-matrix microphone instead of text — the same icon as the bottom button at 2dp per cell; the button sinks when pressed; housing padding 14dp at the top and 8dp elsewhere), small LED at the housing's top right (7dp): connected green / transmitting red / disconnected red blinking

@@ -116,5 +116,6 @@
     <string name="mic_auto">Auto</string>
     <string name="mic_phone">Phone</string>
     <string name="mic_headset">Headset</string>
+    <string name="mic_bt_denied">Without the Bluetooth permission only wired and USB headset mics can be used; a Bluetooth headset falls back to the default mic.</string>
     <string name="mic_sub">Tap to switch: Auto (system default), Phone (built-in mic), Headset (wired, USB or Bluetooth). Falls back to the default if the headset isn\'t connected</string>
 </resources>

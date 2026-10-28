@@ -22,6 +22,14 @@ class MicTest {
 
     @Test fun unknownPrefIsAuto() = assertNull(Mic.pick("bogus", listOf(builtin, wired)))
 
+    @Test fun onlyBluetoothTypesAreFlaggedAsBluetooth() {
+        assertEquals(true, Mic.isBluetooth(sco))
+        assertEquals(true, Mic.isBluetooth(AudioDeviceInfo.TYPE_BLE_HEADSET))
+        assertEquals(false, Mic.isBluetooth(wired))
+        assertEquals(false, Mic.isBluetooth(AudioDeviceInfo.TYPE_USB_HEADSET))
+        assertEquals(false, Mic.isBluetooth(builtin))
+    }
+
     @Test fun nextCyclesThroughAllChoices() {
         assertEquals(Mic.PHONE, Mic.next(Mic.AUTO))
         assertEquals(Mic.HEADSET, Mic.next(Mic.PHONE))

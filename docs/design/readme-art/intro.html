@@ -1,7 +1,7 @@
-<!-- README 소개 GIF(docs/screenshots/intro-ko|en.gif). 주소 #시간,언어 로 한 장면을 그림(예: intro.html#3.5,en).
- 만들기(이 폴더에서): 0~11.9초를 0.1초 간격으로 120장 찍고(google-chrome --headless=new --hide-scrollbars --window-size=900,440
- --virtual-time-budget=1500 --screenshot=f000.png "file://$PWD/intro.html#0,ko") ffmpeg로 초당 8장(0.8배 속도) GIF:
- ffmpeg -framerate 10 -i f%03d.png -vf palettegen=max_colors=96 pal.png && ffmpeg -framerate 8 -i f%03d.png -i pal.png -lavfi paletteuse=dither=none -loop 0 intro-ko.gif -->
+<!-- README intro GIF (docs/screenshots/intro-en.gif). The URL hash is the time in seconds and draws one scene (e.g. intro.html#3.5).
+ To build it (from this folder): shoot 0-11.9 s at 0.1 s steps, 120 frames (google-chrome --headless=new --hide-scrollbars --window-size=900,440
+ --virtual-time-budget=1500 --screenshot=f000.png "file://$PWD/intro.html#0"), then ffmpeg at 8 frames/s (0.8x speed) into a GIF:
+ ffmpeg -framerate 10 -i f%03d.png -vf palettegen=max_colors=96 pal.png && ffmpeg -framerate 8 -i f%03d.png -i pal.png -lavfi paletteuse=dither=none -loop 0 intro-en.gif -->
 <!doctype html><meta charset="utf-8"><style>
 @font-face{font-family:N;src:url(../../../android/app/src/main/assets/fonts/NeoDunggeunmoPro-Regular.ttf)}
 *{box-sizing:border-box;margin:0}html,body{background:#1a1a1a;width:900px;height:440px;overflow:hidden}
@@ -42,10 +42,10 @@ body{font-family:N;color:#1F2818;position:relative}
 <div class="pkt" id="pkt"></div>
 <div class="card" id="card"></div>
 <script>
-const [T0,LG]=location.hash.slice(1).split(',');const t=parseFloat(T0)||0;const EN=LG==='en';const W=(k,e)=>EN?e:k
+const t=parseFloat(location.hash.slice(1))||0
 const typ=(s,a,b)=>s.slice(0,Math.max(0,Math.min(s.length,Math.floor((t-a)/(b-a)*s.length))))
-const ask=W('테스트 왜 깨졌는지 봐 줘',"Why is the test failing")
-const ans=W('윤년 계산이 빠져 있었어요. 고쳤고, 테스트 열두 개 모두 통과합니다.','It missed leap years. Fixed, and all twelve tests pass.')
+const ask="Why is the test failing"
+const ans='It missed leap years. Fixed, and all twelve tests pass.'
 
 const MIC=[".....##.....","....####....","....####....","....####....","##..####..##","##..####..##","##..####..##","##...##...##",".##......##.","..########..",".....##.....",".....##.....","..########..","..########.."]
 const SL=["..###.......","############","..###.......","............","............",".......###..","############",".......###..","............","............","....###.....","############","....###....."]
@@ -54,27 +54,27 @@ const SPK=["....##......","...###...#..","######..#...","######.#..#.","######.#
 const ic=(rows,c,col)=>{let r='';rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch=='#')r+='<rect x="'+x*c+'" y="'+y*c+'" width="'+(c-.6)+'" height="'+(c-.6)+'"/>'}));return '<svg width="'+rows[0].length*c+'" height="'+rows.length*c+'" fill="'+col+'" style="display:block">'+r+'</svg>'}
 const bars=(n,col,seed)=>{let h='<div style="display:flex;align-items:center;gap:3px;height:36px">';for(let i=0;i<n;i++){const v=Math.abs(Math.sin(t*9+i*1.7+seed)*Math.sin(t*4.3+i*.6));const k=1+Math.round(v*5);h+='<div style="width:5px;height:'+(k*6)+'px;background:'+col+'"></div>'}return h+'</div>'}
 document.getElementById('k1').innerHTML=ic(SL,2.5,'#D6D6D6');document.getElementById('k2').insertAdjacentHTML('beforeend',ic(PW,2.5,'#D6D6D6'));document.getElementById('ptt').innerHTML=ic(MIC,2.5,'#D6D6D6')
-const ME=W('나&gt; ','ME&gt; '),CL=W('비서&gt; ','CLAUDE&gt; ');document.getElementById('st').textContent=W('연결 ▮▮▮▮','Connected ▮▮▮▮');document.getElementById('net').textContent=W('같은 Wi-Fi · Tailscale','same Wi-Fi · Tailscale');const led=document.getElementById('led'),conv=document.getElementById('conv'),pc=document.getElementById('pc'),pkt=document.getElementById('pkt'),ptt=document.getElementById('ptt'),card=document.getElementById('card')
+const ME='ME&gt; ',CL='CLAUDE&gt; ';document.getElementById('st').textContent='Connected ▮▮▮▮';document.getElementById('net').textContent='same Wi-Fi · Tailscale';const led=document.getElementById('led'),conv=document.getElementById('conv'),pc=document.getElementById('pc'),pkt=document.getElementById('pkt'),ptt=document.getElementById('ptt'),card=document.getElementById('card')
 led.style.background='#7BD36B'
 const tx=t>=1&&t<3.6
 if(tx){ptt.classList.add('down');led.style.background='#C0392B';conv.classList.add('inv')
- conv.innerHTML='<div style="font-size:24px">'+W('● 송신 중','● Transmitting')+'</div><div class="l" style="margin-top:6px;opacity:.8">'+W('다시 누르면 보내요','Tap again to send')+'</div><div style="display:flex;align-items:center;gap:10px;margin-top:18px">'+ic(MIC,3,'#9CA88A')+(t>=1.3&&t<3.3?bars(14,'#9CA88A',0):'')+'</div><div class="l" style="margin-top:14px;font-size:16px">'+typ(ask,1.3,3.2)+'</div>'}
+ conv.innerHTML='<div style="font-size:24px">'+'● Transmitting'+'</div><div class="l" style="margin-top:6px;opacity:.8">'+'Tap again to send'+'</div><div style="display:flex;align-items:center;gap:10px;margin-top:18px">'+ic(MIC,3,'#9CA88A')+(t>=1.3&&t<3.3?bars(14,'#9CA88A',0):'')+'</div><div class="l" style="margin-top:14px;font-size:16px">'+typ(ask,1.3,3.2)+'</div>'}
 else{let h='<div style="height:100%;display:flex;flex-direction:column;justify-content:flex-end">'
- h+='<div class="l"><span class="me">'+ME+W('오늘 뭐 남았지',"What's left for today")+'</span></div><div class="l">'+CL+W('결제 화면 정리가 남았어요.','The checkout screen cleanup.')+'</div><div style="height:8px"></div>'
+ h+='<div class="l"><span class="me">'+ME+"What's left for today"+'</span></div><div class="l">'+CL+'The checkout screen cleanup.'+'</div><div style="height:8px"></div>'
  if(t>=3.6)h+='<div class="l me">'+ME+ask+(t<4.4?' ·':' ✓')+'</div>'
  if(t>=7.6){h+='<div style="height:8px"></div><div class="l">'+CL+typ(ans,7.8,9.6)+'</div>'}
- if(t>=7.4&&t<9.9)h+='<div style="display:flex;align-items:center;gap:10px;margin-top:8px">'+ic(SPK,3,'#1F2818')+(t<7.8?'<span class="l">'+W('삐빅','beep')+'</span>':bars(14,'#1F2818',3)+'<span class="l" style="opacity:.7">'+W('읽는 중','reading')+'</span>')+'</div>'
+ if(t>=7.4&&t<9.9)h+='<div style="display:flex;align-items:center;gap:10px;margin-top:8px">'+ic(SPK,3,'#1F2818')+(t<7.8?'<span class="l">'+'beep'+'</span>':bars(14,'#1F2818',3)+'<span class="l" style="opacity:.7">'+'reading'+'</span>')+'</div>'
  conv.innerHTML=h+'</div>'}
 const O='<span style="color:#D97757">●</span> ',G=s=>'<span style="color:#8a8a8a">'+s+'</span>'
 let p=[G('╭ Claude Code'),'']
 if(t>=4.4)p.push('<span style="color:#9CA88A">&lt;walkie&gt;</span> '+ask,'')
 if(t>=4.9)p.push(O+'Bash(bun test)',G('  ⎿ 11 pass, 1 fail'))
-if(t>=5.5)p.push(O+'Edit(src/date.ts)',G('  ⎿ '+W('윤년 처리 추가','handle leap years')))
+if(t>=5.5)p.push(O+'Edit(src/date.ts)',G('  ⎿ '+'handle leap years'))
 if(t>=6.0)p.push(O+'Bash(bun test)',G('  ⎿ 12 pass'))
-if(t>=6.5)p.push(O+'walkie - reply',G('  ⎿ '+W('폰으로 답 보냄','reply sent to phone')))
+if(t>=6.5)p.push(O+'walkie - reply',G('  ⎿ '+'reply sent to phone'))
 pc.innerHTML=p.map(x=>'<div style="white-space:pre;min-height:18px">'+x+'</div>').join('')
 const mv=(a,b,x0,x1,y,txt)=>{if(t>=a&&t<b){const k=(t-a)/(b-a);pkt.style.left=(x0+(x1-x0)*k)+'px';pkt.style.top=y+'px';pkt.textContent=txt}}
-pkt.textContent='';mv(3.6,4.4,362,478,180,W('글자 ▶','text ▶'));mv(6.6,7.4,478,362,220,W('◀ 답','◀ reply'))
+pkt.textContent='';mv(3.6,4.4,362,478,180,'text ▶');mv(6.6,7.4,478,362,220,'◀ reply')
 if(t>=10){const a=Math.min(1,(t-10)/0.4);card.style.background='rgba(26,26,26,'+(0.88*a)+')';card.style.opacity=1
  card.innerHTML='<div style="opacity:'+a+';color:#D6D6D6;font-size:44px;letter-spacing:2px">WALKIE-CLAUDIE</div><div style="opacity:'+a+';color:#9CA88A;font-size:20px">Press. Talk. Listen.</div>'}
 </script>

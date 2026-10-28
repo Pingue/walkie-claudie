@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <style>
 @font-face{font-family:'NeoDunggeunmo';src:url('neodgm.woff2') format('woff2')}
-/* 토큰 — B안(삐삐·계산기 액정) */
+/* Tokens — option B (pager / calculator LCD) */
 :root{
-  --body:#262626;      /* 기계 몸통 */
+  --body:#262626;      /* machine body */
   --key:#3a3a3a; --key-sh:#111; --key-fg:#d6d6d6;
-  --lcd:#9CA88A;       /* 액정 바탕 */
-  --ink:#1f2818;       /* 액정 글씨 */
-  --ghost:rgba(31,40,24,.12); /* 꺼진 칸 */
-  --warn:#c0392b;      /* 녹음·끊김 표시 (몸통 위 작은 불) */
+  --lcd:#9CA88A;       /* LCD background */
+  --ink:#1f2818;       /* LCD ink */
+  --ghost:rgba(31,40,24,.12); /* unlit cell */
+  --warn:#c0392b;      /* recording / disconnected (small LED on the body) */
   --led-ok:#7bd36b;
   --r-lcd:6px; --r-key:9px;
-  --pixel:'NeoDunggeunmo',monospace; --sans:'Noto Sans CJK KR',sans-serif;
+  --pixel:'NeoDunggeunmo',monospace; --sans:sans-serif;
   --t-l:24px; --t-m:15px; --t-s:12px;
 }
 *{box-sizing:border-box;margin:0}
@@ -39,10 +39,10 @@ body{background:#d9d5cc;display:flex;gap:36px;padding:56px 32px 32px;align-items
 .k.talk{color:#fff}
 .led{position:absolute;top:8px;right:28px;width:7px;height:7px;border-radius:50%;background:var(--led-ok);box-shadow:0 0 6px var(--led-ok)}
 .brand{font:11px var(--pixel);color:#777;text-align:center;letter-spacing:2px;margin-top:-2px}
-/* 녹음 중 */
+/* recording */
 .rec .lcd.inv{background-color:var(--ink);color:var(--lcd);background-image:none}
 .rec .led{background:var(--warn);box-shadow:0 0 8px var(--warn)}
-/* 설정 */
+/* settings */
 .menu{flex:1;font-size:var(--t-m);line-height:1}
 .menu .t{font-size:var(--t-s);opacity:.7;margin:10px 0 6px}
 .menu .t:first-child{margin-top:0}
@@ -52,58 +52,58 @@ body{background:#d9d5cc;display:flex;gap:36px;padding:56px 32px 32px;align-items
 .off{border:1px solid var(--ink);padding:1px 4px;opacity:.6}
 </style></head><body>
 
-<div class="w"><div class="cap">① 평소</div>
+<div class="w"><div class="cap">① Idle</div>
 <div class="p"><span class="led"></span>
   <div class="lcd">
-    <div class="hdr"><span>CH1 비서</span><span class="s">연결<span class="ant"><i style="height:4px"></i><i style="height:7px"></i><i style="height:10px"></i><i style="height:13px"></i></span></span></div>
+    <div class="hdr"><span>CH1 CLAUDE</span><span class="s">Connected<span class="ant"><i style="height:4px"></i><i style="height:7px"></i><i style="height:10px"></i><i style="height:13px"></i></span></span></div>
     <div class="meters">
-      <div><span class="s">5시간</span> <span>46%</span><div class="cells"><i></i><i></i><i></i><i></i><i></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i></div></div>
-      <div><span class="s">주간</span> <span>66%</span><div class="cells"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="o"></i><i class="o"></i><i class="o"></i></div></div>
+      <div><span class="s">5h</span> <span>46%</span><div class="cells"><i></i><i></i><i></i><i></i><i></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i></div></div>
+      <div><span class="s">Week</span> <span>66%</span><div class="cells"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="o"></i><i class="o"></i><i class="o"></i></div></div>
     </div>
   </div>
-  <div class="lcd todo"><span class="s">남은 일 3</span><br>· 무전기 배터리 % 확인<br>· 가구배치 1.1.3 게시 승인<br>· Play API 연동 2가지</div>
+  <div class="lcd todo"><span class="s">Open items 3</span><br>· Check walkie battery %<br>· Approve layout 1.1.3 release<br>· Two Play API integrations</div>
   <div class="lcd log">
-    <div class="me">나&gt; 예 그렇게 해 주세요</div>
-    <div>비서&gt; 비공개 저장소로 올릴게요.</div>
-    <div class="me">나&gt; 아니요</div>
-    <div>비서&gt; 알겠어요. 올리는 건 말씀하실 때만 할게요.<span class="blink"></span></div>
+    <div class="me">ME&gt; Yes, please do that</div>
+    <div>CLAUDE&gt; I'll push it to a private repo.</div>
+    <div class="me">ME&gt; No</div>
+    <div>CLAUDE&gt; Understood. I'll only push when you say so.<span class="blink"></span></div>
   </div>
-  <div class="keys"><div class="k">설정</div><div class="k">끄기</div><div class="k talk">말하기</div></div>
+  <div class="keys"><div class="k">Settings</div><div class="k">Off</div><div class="k talk">Talk</div></div>
   <div class="brand">WALKIE-CLAUDIE</div>
 </div></div>
 
-<div class="w"><div class="cap">② 말하는 중</div>
+<div class="w"><div class="cap">② Talking</div>
 <div class="p rec"><span class="led"></span>
   <div class="lcd">
-    <div class="hdr"><span>CH1 비서</span><span class="s">연결<span class="ant"><i style="height:4px"></i><i style="height:7px"></i><i style="height:10px"></i><i style="height:13px"></i></span></span></div>
-    <div class="meters"><div><span class="s">5시간</span> 46%</div><div><span class="s">주간</span> 66%</div></div>
+    <div class="hdr"><span>CH1 CLAUDE</span><span class="s">Connected<span class="ant"><i style="height:4px"></i><i style="height:7px"></i><i style="height:10px"></i><i style="height:13px"></i></span></span></div>
+    <div class="meters"><div><span class="s">5h</span> 46%</div><div><span class="s">Week</span> 66%</div></div>
   </div>
   <div class="lcd inv" style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px">
-    <div class="big">● 송신 중</div>
-    <div class="s" style="opacity:.8">떼면 보내요</div>
-    <div style="font-size:15px;margin-top:8px">"가구배치 1.1.3 게시해 줘"</div>
+    <div class="big">● TRANSMITTING</div>
+    <div class="s" style="opacity:.8">Release to send</div>
+    <div style="font-size:15px;margin-top:8px">"Release layout 1.1.3"</div>
   </div>
-  <div class="keys"><div class="k">설정</div><div class="k">취소</div><div class="k talk">말하기</div></div>
+  <div class="keys"><div class="k">Settings</div><div class="k">Cancel</div><div class="k talk">Talk</div></div>
   <div class="brand">WALKIE-CLAUDIE</div>
 </div></div>
 
-<div class="w"><div class="cap">③ 설정</div>
+<div class="w"><div class="cap">③ Settings</div>
 <div class="p"><span class="led"></span>
   <div class="lcd menu">
-    <div class="t">연결</div>
-    <div class="it"><div>PC 주소<small>192.168.0.10:7700</small></div><span>붙여넣기</span></div>
-    <div class="it"><div>키<small>************</small></div><span>QR</span></div>
-    <div class="t">말하기 버튼</div>
-    <div class="it"><div>음량 길게<small>화면 켜져 있을 때</small></div><span class="on">ON</span></div>
-    <div class="it"><div>이어폰 한 번<small>음악 앱이 쓰면 그 앱 우선</small></div><span class="off">OFF</span></div>
-    <div class="it"><div>이어폰 두 번</div><span class="off">OFF</span></div>
-    <div class="it"><div>떠 있는 버튼</div><span class="off">OFF</span></div>
-    <div class="t">목소리</div>
-    <div class="it"><div>kod-network<small>속도 1.0배</small></div><span>바꾸기</span></div>
-    <div class="t">점검</div>
-    <div class="it"><div>버튼 테스트</div><span>열기</span></div>
+    <div class="t">Connection</div>
+    <div class="it"><div>PC address<small>192.168.0.10:7700</small></div><span>Paste</span></div>
+    <div class="it"><div>Key<small>************</small></div><span>QR</span></div>
+    <div class="t">Talk buttons</div>
+    <div class="it"><div>Hold volume key<small>Screen on only</small></div><span class="on">ON</span></div>
+    <div class="it"><div>Earphone single<small>The music app wins if it is playing</small></div><span class="off">OFF</span></div>
+    <div class="it"><div>Earphone double</div><span class="off">OFF</span></div>
+    <div class="it"><div>Floating button</div><span class="off">OFF</span></div>
+    <div class="t">Voice</div>
+    <div class="it"><div>kod-network<small>Speed 1.0x</small></div><span>Change</span></div>
+    <div class="t">Troubleshooting</div>
+    <div class="it"><div>Button test</div><span>Open</span></div>
   </div>
-  <div class="keys"><div class="k">← 뒤로</div></div>
+  <div class="keys"><div class="k">← Back</div></div>
   <div class="brand">WALKIE-CLAUDIE</div>
 </div></div>
 </body></html>
