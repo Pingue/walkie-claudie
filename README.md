@@ -71,7 +71,7 @@ Putting those four together, the plan became: vibe code with my mouth and ears w
      2. Still blocked: Play Store › profile › Play Protect › Settings (gear) › turn off "Scan apps with Play Protect" → install the APK → turn it back on in the same place
 4. Type `/walkie:pair` inside the session from step 2 → scan the QR in the app under **Settings › Key › QR**
    - QR looks broken: run `bun <plugin path>/pair.ts` in a terminal
-   - Can't scan (e.g. it's on the same phone): copy the line from `pair.ts --text` → app **Settings › PC address › Paste**
+   - Can't scan (e.g. it's on the same phone): copy the line from `pair.ts --text` → app **Settings › PC address › Paste**, or paste it into either the PC address or the Key box (both get filled)
 5. Open the app → allow microphone and notifications → tap **On** on the main screen → follow the prompts to turn on "Display over other apps" (floating button) and Accessibility (volume keys). Details in [Permissions and accessibility](#permissions-and-accessibility) below
 
 #### Permissions and accessibility

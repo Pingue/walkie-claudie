@@ -14,7 +14,6 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
-import org.json.JSONObject
 
 /** One LCD menu: PC address and key, the talk-button switches, voice, button test. Changes restart a running walkie. */
 class SettingsActivity : Activity() {
@@ -42,10 +41,10 @@ class SettingsActivity : Activity() {
 
         title(R.string.sec_connection)
         row(R.string.pc_address, getString(R.string.tap_to_edit, url.removePrefix("http://").ifEmpty { getString(R.string.none) }), action(R.string.paste) { paste() }) {
-            edit(R.string.pc_address, url, "http://192.168.0.10:7700", InputType.TYPE_TEXT_VARIATION_URI) { setPairing(it) || saveUrl(it) }
+            edit(R.string.pc_address, url, "http://192.168.0.10:7700", InputType.TYPE_TEXT_VARIATION_URI) { pasted(it) { saveUrl(it) } }
         }
         row(R.string.key, getString(R.string.tap_to_edit, getString(if (key.isEmpty()) R.string.none else R.string.key_saved)), action(R.string.qr) { scan() }) {
-            edit(R.string.key, key, getString(R.string.key_hint), InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD) { save { putString("key", it) } }
+            edit(R.string.key, key, getString(R.string.key_hint), InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD) { pasted(it) { save { putString("key", it) } } }
         }
 
         title(R.string.sec_talk)
@@ -113,24 +112,31 @@ class SettingsActivity : Activity() {
         }
     }
 
-    /** Pairing text ({"url":…,"key":…}, same as the QR) fills both fields. */
+    /** Pairing text ({"url":…,"key":…}, same as the QR) fills both fields, whichever box it was pasted into. */
     private fun setPairing(text: String): Boolean {
-        val j = text.trim().takeIf { it.startsWith("{") }?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return false
-        save { putString("url", j.optString("url")).putString("key", j.optString("key")) }
+        val p = Pairing.parse(text) ?: return false
+        save { putString("url", p.url).putString("key", p.key) }
         return true
+    }
+
+    /** Text typed or pasted into a connection field: a pairing fills both, a broken one (it has a brace) is refused, anything else is handled by [otherwise]. */
+    private fun pasted(text: String, otherwise: () -> Unit) {
+        if (setPairing(text)) return
+        if ('{' in text) return Toast.makeText(this, R.string.bad_pairing, Toast.LENGTH_LONG).show()
+        otherwise()
     }
 
     private fun paste() {
         val text = getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(0)?.coerceToText(this)?.toString()?.trim()
         if (text.isNullOrEmpty()) return Toast.makeText(this, R.string.clipboard_empty, Toast.LENGTH_SHORT).show()
-        setPairing(text) || saveUrl(text)
+        pasted(text) { saveUrl(text) }
     }
 
     private fun scan() = GmsBarcodeScanning.getClient(this).startScan().addOnSuccessListener { code ->
         if (!setPairing(code.rawValue.orEmpty())) Toast.makeText(this, R.string.bad_qr, Toast.LENGTH_LONG).show()
     }
 
-    private fun saveUrl(url: String) = save { putString("url", if (url.isEmpty() || "://" in url) url else "http://$url") }
+    private fun saveUrl(url: String) = save { putString("url", Pairing.normalizeUrl(url)) }
 
     private fun edit(label: Int, value: String, hint: String, type: Int, onSave: (String) -> Unit) {
         val field = EditText(this).apply { setText(value); this.hint = hint; inputType = type; setSingleLine() }
