@@ -23,6 +23,7 @@
     <string name="st_answered">answered</string>
     <string name="waiting">%d waiting to send</string>
     <string name="err_speech">speech error %d</string>
+    <string name="bad_pairing">That isn\'t complete pairing text. Run /walkie:pair on the PC and copy the whole {"url":…,"key":…} line.</string>
     <string name="bad_qr">Not a Walkie-Claudie QR. Run /walkie:pair on the PC.</string>
     <string name="trig_floating">Floating button</string>
     <string name="trig_volume">Hold volume key</string>
