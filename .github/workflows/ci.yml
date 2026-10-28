@@ -33,7 +33,8 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
+      - name: Accept Android SDK licenses # the runner image already has the SDK
+        run: yes | "$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | tail -1)" --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
       - name: Unit tests and debug build
         run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
