@@ -128,7 +128,7 @@ class MainActivity : Activity() {
             visibility = View.GONE
             setOnClickListener { log.smoothScrollTo(0, talk.height) }
         }
-        // Walkie off: the conversation dims under a big "Off" (10/9 사용자: on/off was hard to tell apart).
+        // Walkie off: the conversation dims under a big "Off" (on/off was hard to tell apart).
         offMark = lcdText(Ui.L).apply { setText(R.string.st_off); letterSpacing = 0.04f }
         logBox = body.lcd(android.widget.FrameLayout(this).apply {
             addView(log)
@@ -353,7 +353,7 @@ class MainActivity : Activity() {
         toBottom.setText(if (unseen) R.string.new_lines else R.string.to_bottom)
     }
 
-    /** On: one buzz and the power-on chirp; off: two short buzzes and the power-off tone (10/9 사용자: on/off was hard to tell apart). */
+    /** On: one buzz and the power-on chirp; off: two short buzzes and the power-off tone (on/off was hard to tell apart). */
     private fun buzz(off: Boolean) {
         getSystemService(android.os.Vibrator::class.java).vibrate(
             if (off) android.os.VibrationEffect.createWaveform(longArrayOf(0, 40, 80, 40), -1)

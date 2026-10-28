@@ -1,10 +1,9 @@
-# README 연결 구조 그림(docs/screenshots/diagram-ko|en.png). 디자인 토큰: docs/design/tokens.md
-# 만들기(이 폴더에서): python3 diagram.py ko > d.html && google-chrome --headless=new --hide-scrollbars \
+# README architecture diagram (docs/screenshots/diagram-en.png). Design tokens: docs/design/tokens.md
+# Build (from this folder): python3 diagram.py en > d.html && google-chrome --headless=new --hide-scrollbars \
 #   --force-device-scale-factor=2 --default-background-color=00000000 --window-size=932,330 --screenshot=d.png "file://$PWD/d.html"
-#   → 투명 여백을 잘라(PIL getbbox) ../../screenshots/diagram-ko.png 로. en도 같음.
+#   -> crop the transparent margin (PIL getbbox) into ../../screenshots/diagram-en.png.
 import sys
 T = {
- 'ko': dict(phone='안드로이드 폰', pc='PC', r1='말하기', r1b='음성 인식', r2='음성으로 읽기', ear='이어폰', up='글자', down='답', net='같은 Wi-Fi · Tailscale', plug='walkie 플러그인', sess='Claude Code 세션', n1='PC로는 글자만 감', n2='중계 서버 없음'),
  'en': dict(phone='Android phone', pc='PC', r1='Talk', r1b='speech recognition', r2='read aloud', ear='Earphones', up='text', down='reply', net='same Wi-Fi · Tailscale', plug='walkie plugin', sess='Claude Code session', n1='only text goes to the PC', n2='no relay server'),
 }[sys.argv[1]]
 print(f'''<!doctype html><meta charset="utf-8"><style>

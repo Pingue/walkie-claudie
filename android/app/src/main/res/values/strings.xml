@@ -111,4 +111,10 @@
     <string name="a11y_guide">Hold volume down to talk and volume up for monologue mode: both need Walkie-Claudie\'s accessibility service, because Android only hands volume key presses to other apps through Accessibility. It watches the volume keys only; it doesn\'t read the screen.\n\nHow\n1. [Accessibility] below\n2. Installed apps › Walkie-Claudie (the menu name varies by phone, e.g. \"Downloaded apps\", \"Installed services\")\n3. Turn the switch on › Allow (the \"full control\" warning is the same for every accessibility app)\n\nSwitch greyed out, or a \"Restricted setting\" message? (Android 13+, apps installed outside the Play Store)\n1. [App info] below › ⋮ (top right) › Allow restricted settings\n2. Back to [Accessibility] and turn it on\n\nNot using the volume keys? [Later]. The floating and earphone buttons work without it.</string>
     <string name="a11y_off">Accessibility is off</string>
     <string name="a11y_off_sub">The volume keys need it on</string>
+    <string name="sec_mic">Microphone</string>
+    <string name="mic">Microphone</string>
+    <string name="mic_auto">Auto</string>
+    <string name="mic_phone">Phone</string>
+    <string name="mic_headset">Headset</string>
+    <string name="mic_sub">Tap to switch: Auto (system default), Phone (built-in mic), Headset (wired, USB or Bluetooth). Falls back to the default if the headset isn\'t connected</string>
 </resources>

@@ -20,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
 
 /**
- * Monologue (10/9 사용자): one long recording that ignores pauses. We own the mic and feed the recognizer
+ * Monologue (10/9): one long recording that ignores pauses. We own the mic and feed the recognizer
  * through a pipe in one segmented session (API 33 EXTRA_AUDIO_SOURCE), which only ends when we close the pipe,
  * so there's no session-per-pause restarting. The audio is also kept in [file]: if recognition fails it is
  * fed again from there. test phone (10/9): fed in full, no restarts across 5 s pauses. Callbacks on the main thread.
@@ -48,6 +48,7 @@ class Monologue(
         val min = AudioRecord.getMinBufferSize(RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
         val rec = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, RATE, AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT, maxOf(min, RATE)) // ≥ 0.5 s of buffer
+        Mic.device(ctx, Mic.pref(ctx))?.let { rec.preferredDevice = it }
         rec.startRecording()
         thread(name = "monologue-rec") {
             FileOutputStream(file).use { out ->

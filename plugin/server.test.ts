@@ -55,28 +55,28 @@ test('say → channel notification, reply → poll', async () => {
   try {
     expect((await fetch(`${base}/poll`, { headers: { authorization: 'Bearer nope' } })).status).toBe(401)
 
-    const say = () => fetch(`${base}/say`, { method: 'POST', headers: auth, body: JSON.stringify({ id: 'm1', text: '안녕' }) })
+    const say = () => fetch(`${base}/say`, { method: 'POST', headers: auth, body: JSON.stringify({ id: 'm1', text: 'hello' }) })
     expect((await say()).status).toBe(200)
     expect((await say()).status).toBe(200) // retry: acked, not re-delivered
     await Bun.sleep(100)
     expect(inbound.length).toBe(1)
     expect(inbound[0].method).toBe('notifications/claude/channel')
-    expect(inbound[0].params).toMatchObject({ content: '안녕', meta: { msg_id: 'm1' } })
+    expect(inbound[0].params).toMatchObject({ content: 'hello', meta: { msg_id: 'm1' } })
 
     const pending = fetch(`${base}/poll?after=0`, { headers: auth }).then(r => r.json())
     await Bun.sleep(100)
-    await client.callTool({ name: 'set_issues', arguments: { items: ['A 승인 대기'] } })
-    expect((await pending).issues).toEqual(['A 승인 대기']) // long-poll woke on issues change
+    await client.callTool({ name: 'set_issues', arguments: { items: ['A awaiting approval'] } })
+    expect((await pending).issues).toEqual(['A awaiting approval']) // long-poll woke on issues change
 
     // statusline.ts saves the status JSON; poll passes the usage limits through
     const status = JSON.stringify({ model: {}, rate_limits: { five_hour: { used_percentage: 23.4, resets_at: 1 } } })
     const sl = Bun.spawnSync(['bun', join(import.meta.dir, 'statusline.ts')], { stdin: Buffer.from(status), env: { ...process.env, WALKIE_STATE_DIR: dir } })
     expect(sl.stdout.toString().trim()).toBe('5h 23% · 7d –')
 
-    await client.callTool({ name: 'reply', arguments: { text: '네, 받았어요', reply_to: 'm1' } })
+    await client.callTool({ name: 'reply', arguments: { text: 'Yes, got it', reply_to: 'm1' } })
     const got = await (await fetch(`${base}/poll?after=0`, { headers: auth })).json()
     expect(got.replies).toHaveLength(1)
-    expect(got.replies[0]).toMatchObject({ text: '네, 받았어요', reply_to: 'm1' })
+    expect(got.replies[0]).toMatchObject({ text: 'Yes, got it', reply_to: 'm1' })
     expect(got.usage.five_hour.used_percentage).toBe(23.4)
     const again = await (await fetch(`${base}/poll?after=${got.replies[0].seq}`, { headers: auth, signal: AbortSignal.timeout(300) }).catch(() => null))
     expect(again).toBeNull() // nothing new → still waiting
@@ -90,24 +90,24 @@ test('say → channel notification, reply → poll', async () => {
   const next = await start(true, dir)
   try {
     const got = await (await fetch(`http://127.0.0.1:${next.port}/poll?after=0`, { headers: auth })).json()
-    expect(got.replies.map((r: any) => r.text)).toEqual(['네, 받았어요'])
+    expect(got.replies.map((r: any) => r.text)).toEqual(['Yes, got it'])
   } finally {
     await next.client.close()
   }
 }, 15_000)
 
 test('two sessions → two channels on neighbouring ports, each with its own name and outbox', async () => {
-  const a = await start(true, undefined, 18800 + Math.floor(Math.random() * 1000), '비서')
-  const b = await start(true, a.dir, a.port, '가구배치')
+  const a = await start(true, undefined, 18800 + Math.floor(Math.random() * 1000), 'assistant')
+  const b = await start(true, a.dir, a.port, 'layout')
   const auth = { authorization: `Bearer ${readFileSync(join(a.dir, 'key'), 'utf8').trim()}` }
   try {
     const hello = (p: number) => fetch(`http://127.0.0.1:${p}/hello`, { headers: auth }).then(r => r.json())
-    expect(await hello(a.port)).toEqual({ name: '비서', port: a.port })
-    expect(await hello(a.port + 1)).toEqual({ name: '가구배치', port: a.port + 1 })
-    await b.client.callTool({ name: 'reply', arguments: { text: '가구 답' } })
+    expect(await hello(a.port)).toEqual({ name: 'assistant', port: a.port })
+    expect(await hello(a.port + 1)).toEqual({ name: 'layout', port: a.port + 1 })
+    await b.client.callTool({ name: 'reply', arguments: { text: 'layout reply' } })
     const poll = (p: number) => fetch(`http://127.0.0.1:${p}/poll?after=0&wait=0`, { headers: auth }).then(r => r.json())
     expect((await poll(a.port)).replies).toHaveLength(0)
-    expect((await poll(a.port + 1)).replies.map((r: any) => r.text)).toEqual(['가구 답'])
+    expect((await poll(a.port + 1)).replies.map((r: any) => r.text)).toEqual(['layout reply'])
   } finally {
     await a.client.close()
     await b.client.close()

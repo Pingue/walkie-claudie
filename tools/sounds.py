@@ -25,7 +25,7 @@ def gap(ms): return [0.0] * int(R * ms / 1000)
 def mix(*parts): return [s for p in parts for s in p]
 
 
-# Patterns from real two-way radios, beeps only (10/9 사용자: 치직 빼고 실제 무전기 소리).
+# Patterns from real two-way radios, beeps only (10/9: no static, real radio sounds).
 SOUNDS = {
     # pressing talk: MOTOTRBO talk permit tone, 1570/1050/1570/1320 Hz x 40 ms (RadioReference forum, community-measured)
     "talk_start": mix(tone(1570, 40), tone(1050, 40), tone(1570, 40), tone(1320, 40)),

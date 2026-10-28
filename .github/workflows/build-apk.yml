@@ -1,0 +1,80 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # attach the APK to a GitHub release on tags
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon assembleDebug
+        working-directory: android
+
+      # Release signing is optional. Add these repository secrets to get a signed release APK;
+      # without them only the debug APK is built.
+      #   WALKIE_KEYSTORE_BASE64   the keystore file, base64-encoded
+      #   WALKIE_STORE_PASSWORD, WALKIE_KEY_ALIAS, WALKIE_KEY_PASSWORD
+      - name: Build signed release APK
+        id: release
+        env:
+          KEYSTORE_B64: ${{ secrets.WALKIE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.WALKIE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.WALKIE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.WALKIE_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "No signing secrets set; skipping the release build."
+            exit 0
+          fi
+          dir="$RUNNER_TEMP/keys"
+          mkdir -p "$dir"
+          echo "$KEYSTORE_B64" | base64 -d > "$dir/release.jks"
+          {
+            echo "storeFile=$dir/release.jks"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > "$dir/keystore.properties"
+          ./gradlew --no-daemon assembleRelease -Pwalkie.keystore="$dir/keystore.properties"
+          echo "built=true" >> "$GITHUB_OUTPUT"
+        working-directory: android
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: walkie-claudie-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: steps.release.outputs.built == 'true'
+        with:
+          name: walkie-claudie-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+      - name: Attach APK to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -n "$(ls android/app/build/outputs/apk/release/*.apk 2>/dev/null)" ]; then apk=$(ls android/app/build/outputs/apk/release/*.apk)
+          else apk=$(ls android/app/build/outputs/apk/debug/*.apk); fi
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" $apk --clobber

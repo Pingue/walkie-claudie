@@ -70,7 +70,7 @@ class WalkieService : Service() {
         /** The running service, for the accessibility service's volume-key hold. Main thread only. */
         var instance: WalkieService? = null
 
-        /** The app's own screen is up: it has its own talk key, so the floating one hides (10/12 사용자). Main thread only. */
+        /** The app's own screen is up: it has its own talk key, so the floating one hides (10/12). Main thread only. */
         var appShown = false
             set(v) { field = v; instance?.showFloating() }
     }
@@ -146,7 +146,7 @@ class WalkieService : Service() {
     private val modeListener by lazy {
         AudioManager.OnModeChangedListener {
             // An active session keeps the earphone button even when its callback declines it, so a call's
-            // answer/hang-up never reached the phone app (10/9 사용자, also while a reply was being read):
+            // answer/hang-up never reached the phone app (10/9, also while a reply was being read):
             // step aside for the whole call.
             KeyLog.add("walkie", "audio mode ${audio.mode}") // 1 ringing, 2 call, 3 VoIP; 0 normal
             session?.let { it.playing(!inCall()); it.isActive = !inCall() }
@@ -330,6 +330,7 @@ class WalkieService : Service() {
         main.postDelayed(maxRecording, 120_000)
         setListening(true)
         muteChimes()
+        Mic.open(this)
         session()
     }
 
@@ -456,10 +457,12 @@ class WalkieService : Service() {
         muteChimes()
         beep(R.raw.mono_start)
         setListening(true)
+        Mic.open(this)
         screenOn.acquire(MONOLOGUE_MS + 60_000)
         main.postDelayed(maxMonologue, MONOLOGUE_MS)
         mono = Monologue(this, { Talk.partial = it; Talk.refresh() }) { text ->
             mono = null
+            Mic.close(this)
             if (screenOn.isHeld) screenOn.release()
             main.postDelayed(unmuteLater, 1_000)
             setListening(false)
@@ -472,6 +475,7 @@ class WalkieService : Service() {
         main.removeCallbacks(stopTimeout)
         recognizer?.destroy()
         recognizer = null
+        Mic.close(this)
         main.postDelayed(unmuteLater, 1_000) // the closing chime comes a little after
         setListening(false)
     }
@@ -536,7 +540,7 @@ class WalkieService : Service() {
         }
     }
 
-    /** Scan (10/9 사용자): every open channel is listened to; other channels' replies play after a switch tone, and talking stays on the active channel. */
+    /** Scan (10/9): every open channel is listened to; other channels' replies play after a switch tone, and talking stays on the active channel. */
     private fun scanLoop(listenAll: Boolean) {
         val polling = mutableSetOf(Channels.port(this))
         while (running) {

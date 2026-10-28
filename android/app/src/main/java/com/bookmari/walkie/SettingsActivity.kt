@@ -57,6 +57,10 @@ class SettingsActivity : Activity() {
         switch(R.string.trig_ear_double, R.string.trig_ear_double_sub, WalkieService.EAR_DOUBLE, false)
         switch(R.string.trig_floating, if (ear) R.string.trig_floating_sub else R.string.trig_floating_sub_noear, WalkieService.FLOATING, true)
 
+        title(R.string.sec_mic)
+        val mic = prefs.getString(Mic.PREF, Mic.AUTO)!!
+        row(R.string.mic, getString(R.string.mic_sub), action(Mic.label(mic))) { save { putString(Mic.PREF, Mic.next(mic)) } }
+
         title(R.string.sec_channels)
         switch(R.string.scan, R.string.scan_sub, WalkieService.SCAN, true)
         if (prefs.getBoolean(WalkieService.SCAN, true)) switch(R.string.scan_follow, R.string.scan_follow_sub, WalkieService.FOLLOW, false)

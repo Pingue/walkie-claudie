@@ -10,7 +10,7 @@ import kotlin.concurrent.thread
 
 /**
  * Channels = walkie sessions on the PC, one per port: the paired address's port and the 9 after it
- * (docs/PRD.md 3장). The first channel keeps the pre-channel file names, so old history stays put.
+ * (see README, "Channels"). The first channel keeps the pre-channel file names, so old history stays put.
  */
 object Channels {
     private const val COUNT = 10
