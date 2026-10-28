@@ -116,6 +116,9 @@ Configuration (environment variables):
   - to get a signed release APK, add the secrets `WALKIE_KEYSTORE_BASE64`, `WALKIE_STORE_PASSWORD`, `WALKIE_KEY_ALIAS` and `WALKIE_KEY_PASSWORD`; without them the release carries the debug-signed APK
   - the release logic is `tools/next-version.ts` (tests: `bun test tools/`)
 
+##### Mic test
+Settings › Troubleshooting › Mic test records with the selected mic (nothing is sent to the PC) and shows a live level meter, which input Android actually routed to (phone mic, wired/USB/Bluetooth headset), and what the speech recognizer heard. It says whether the mic picked up sound but no words, or nothing at all. It uses the same path as monologue mode, so it needs Android 13+, and it covers the exact mic choice; the normal talk buttons only get a routing hint (see Microphone).
+
 ##### Music
 Settings › Music chooses what happens to music playing in another app while you record and while a reply is read aloud: Pause (the default; it stops and resumes afterwards), Duck (it gets quieter) or Off. The walkie asks Android for transient audio focus, so it works with players that respect audio focus, which is most of them.
 
@@ -133,7 +136,7 @@ Settings › Microphone cycles Auto (Android decides), Phone (built-in mic) and 
 - Main screen: top channel, connection, usage / middle open items / bottom conversation / keys Settings, On/Off, Talk
   - On/Off key light: green on / dark off. While off, the conversation dims and "Off" appears
 - Channel list: tap the top LCD (`CH1 name ›`)
-- Settings: PC address and key, talk buttons on/off, microphone (Auto / Phone / Headset), music (Pause / Duck / Off), channels, voice, button test
+- Settings: PC address and key, talk buttons on/off, microphone (Auto / Phone / Headset), music (Pause / Duck / Off), channels, voice, mic test, button test
 - Floating button: a small walkie over other apps. Hidden while the app is on screen
   - Light: green connected / red transmitting / blinking red disconnected
 

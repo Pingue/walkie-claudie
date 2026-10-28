@@ -3,6 +3,7 @@ package com.bookmari.walkie
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.media.AudioDeviceInfo
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
@@ -29,6 +30,8 @@ import kotlin.concurrent.thread
 class Monologue(
     private val ctx: Context,
     private val onPartial: (String) -> Unit,
+    private val onLevel: (Float) -> Unit = {},
+    private val onRouted: (AudioDeviceInfo?) -> Unit = {},
     private val onDone: (text: String) -> Unit,
 ) {
     private val main = Handler(Looper.getMainLooper())
@@ -53,11 +56,19 @@ class Monologue(
         thread(name = "monologue-rec") {
             FileOutputStream(file).use { out ->
                 val buf = ByteArray(3_200) // 0.1 s
+                var routedId = -2
                 while (recording) {
                     val n = rec.read(buf, 0, buf.size)
                     if (n <= 0) continue
                     out.write(buf, 0, n)
                     chunks.put(buf.copyOf(n))
+                    val level = MicLevel.level(buf, n)
+                    val device = rec.routedDevice // known once recording runs; may change when a headset connects
+                    val id = device?.id ?: -1
+                    main.post {
+                        if (id != routedId) { routedId = id; onRouted(device) }
+                        onLevel(level)
+                    }
                 }
             }
             rec.stop()

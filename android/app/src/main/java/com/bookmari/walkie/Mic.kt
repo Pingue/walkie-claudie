@@ -27,6 +27,18 @@ object Mic {
     fun needsBluetoothPermission(ctx: Context) = android.os.Build.VERSION.SDK_INT >= 31 &&
         ctx.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
 
+    /** Plain-language name of an input device type, for the mic test. */
+    fun typeLabel(type: Int) = when (type) {
+        AudioDeviceInfo.TYPE_BUILTIN_MIC -> R.string.mic_dev_phone
+        AudioDeviceInfo.TYPE_WIRED_HEADSET -> R.string.mic_dev_wired
+        AudioDeviceInfo.TYPE_USB_HEADSET -> R.string.mic_dev_usb
+        AudioDeviceInfo.TYPE_BLUETOOTH_SCO, AudioDeviceInfo.TYPE_BLE_HEADSET -> R.string.mic_dev_bluetooth
+        else -> R.string.mic_dev_other
+    }
+
+    fun describe(ctx: Context, device: AudioDeviceInfo?) =
+        if (device == null) ctx.getString(R.string.mic_dev_unknown) else "${ctx.getString(typeLabel(device.type))} (${device.productName})"
+
     fun next(pref: String) = CHOICES[(CHOICES.indexOf(pref) + 1) % CHOICES.size]
 
     fun label(pref: String) = when (pref) {
