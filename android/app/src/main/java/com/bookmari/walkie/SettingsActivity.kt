@@ -1,9 +1,11 @@
 package com.bookmari.walkie
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ClipboardManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.InputType
 import android.widget.EditText
@@ -59,7 +61,11 @@ class SettingsActivity : Activity() {
 
         title(R.string.sec_mic)
         val mic = prefs.getString(Mic.PREF, Mic.AUTO)!!
-        row(R.string.mic, getString(R.string.mic_sub), action(Mic.label(mic))) { save { putString(Mic.PREF, Mic.next(mic)) } }
+        row(R.string.mic, getString(R.string.mic_sub), action(Mic.label(mic))) {
+            val chosen = Mic.next(mic)
+            if (chosen == Mic.HEADSET && Mic.needsBluetoothPermission(this)) requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 0)
+            save { putString(Mic.PREF, chosen) }
+        }
 
         title(R.string.sec_channels)
         switch(R.string.scan, R.string.scan_sub, WalkieService.SCAN, true)
@@ -75,6 +81,10 @@ class SettingsActivity : Activity() {
         title(R.string.sec_check)
         row(getString(R.string.button_test), getString(R.string.button_test_sub), action(R.string.open)) { startActivity(Intent(this, ButtonTestActivity::class.java)) }
         menu.addView(lcdText(11f).apply { text = getString(R.string.app_version, BuildConfig.BUILD); alpha = 0.5f }, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dpi(10) })
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        if (grantResults.firstOrNull() == PackageManager.PERMISSION_DENIED) Toast.makeText(this, R.string.mic_bt_denied, Toast.LENGTH_LONG).show()
     }
 
     private fun title(label: Int) = menu.menuTitle(getString(label))

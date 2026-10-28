@@ -1,6 +1,8 @@
 package com.bookmari.walkie
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 
@@ -16,10 +18,14 @@ object Mic {
     const val HEADSET = "headset"
     val CHOICES = listOf(AUTO, PHONE, HEADSET)
 
-    private val HEADSET_TYPES = setOf(
-        AudioDeviceInfo.TYPE_BLUETOOTH_SCO, AudioDeviceInfo.TYPE_BLE_HEADSET,
-        AudioDeviceInfo.TYPE_WIRED_HEADSET, AudioDeviceInfo.TYPE_USB_HEADSET,
-    )
+    private val BLUETOOTH_TYPES = setOf(AudioDeviceInfo.TYPE_BLUETOOTH_SCO, AudioDeviceInfo.TYPE_BLE_HEADSET)
+    private val HEADSET_TYPES = BLUETOOTH_TYPES + setOf(AudioDeviceInfo.TYPE_WIRED_HEADSET, AudioDeviceInfo.TYPE_USB_HEADSET)
+
+    fun isBluetooth(type: Int) = type in BLUETOOTH_TYPES
+
+    /** Android 12+ wants BLUETOOTH_CONNECT before the app may route audio to a Bluetooth device; wired and USB headsets need nothing. */
+    fun needsBluetoothPermission(ctx: Context) = android.os.Build.VERSION.SDK_INT >= 31 &&
+        ctx.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
 
     fun next(pref: String) = CHOICES[(CHOICES.indexOf(pref) + 1) % CHOICES.size]
 
@@ -56,6 +62,7 @@ object Mic {
             HEADSET -> outputs.firstOrNull { it.type in HEADSET_TYPES }
             else -> outputs.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
         } ?: return
+        if (isBluetooth(target.type) && needsBluetoothPermission(ctx)) return // wired and USB headsets still work without it
         runCatching { audio.setCommunicationDevice(target) }
     }
 

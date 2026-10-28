@@ -117,7 +117,7 @@ Configuration (environment variables):
   - the release logic is `tools/next-version.ts` (tests: `bun test tools/`)
 
 ##### Microphone
-Settings › Microphone cycles Auto (Android decides), Phone (built-in mic) and Headset (wired, USB or Bluetooth). If the chosen kind isn't connected, the default is used. Monologue mode honours the choice exactly; the normal talk buttons go through the phone's speech recognizer, which has no device option, so there it is a best-effort routing hint on Android 12+.
+Settings › Microphone cycles Auto (Android decides), Phone (built-in mic) and Headset (wired, USB or Bluetooth). If the chosen kind isn't connected, the default is used. Monologue mode honours the choice exactly; the normal talk buttons go through the phone's speech recognizer, which has no device option, so there it is a best-effort routing hint on Android 12+. On Android 12+ a Bluetooth headset mic also needs the Bluetooth permission, which the app asks for when you pick Headset; without it, wired and USB headsets still work and Bluetooth falls back to the default mic.
 
 ### Screens
 <p align="center">
