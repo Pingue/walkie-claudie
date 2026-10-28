@@ -108,7 +108,7 @@ Configuration (environment variables):
 - Regenerate the beeps: `python3 tools/sounds.py android/app/src/main/res/raw`
 - Plugin tests: `cd plugin && bun install && bun test`
 - App unit tests: `cd android && ./gradlew testDebugUnitTest`
-- CI: pull requests run both test suites (`.github/workflows/ci.yml`). Pushes to `master` and `v*` tags build an APK (`.github/workflows/build-apk.yml`), downloadable from the run's artifacts, and tags attach it to a release. Add the secrets `WALKIE_KEYSTORE_BASE64`, `WALKIE_STORE_PASSWORD`, `WALKIE_KEY_ALIAS` and `WALKIE_KEY_PASSWORD` to also get a signed release APK.
+- CI: pull requests run both test suites (`.github/workflows/ci.yml`). Pushes to `main` and `v*` tags build an APK (`.github/workflows/build-apk.yml`), downloadable from the run's artifacts, and tags attach it to a release. Add the secrets `WALKIE_KEYSTORE_BASE64`, `WALKIE_STORE_PASSWORD`, `WALKIE_KEY_ALIAS` and `WALKIE_KEY_PASSWORD` to also get a signed release APK.
 
 ##### Microphone
 Settings › Microphone cycles Auto (Android decides), Phone (built-in mic) and Headset (wired, USB or Bluetooth). If the chosen kind isn't connected, the default is used. Monologue mode honours the choice exactly; the normal talk buttons go through the phone's speech recognizer, which has no device option, so there it is a best-effort routing hint on Android 12+.
