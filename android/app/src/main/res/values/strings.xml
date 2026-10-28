@@ -125,4 +125,26 @@
     <string name="music_duck">Duck</string>
     <string name="music_off">Off</string>
     <string name="music_sub">Tap to switch: Pause (music stops, then resumes), Duck (music gets quieter), Off. Applies while you record and while a reply is read aloud</string>
+    <string name="mic_test">Mic test</string>
+    <string name="mic_test_sub">Check that the selected mic hears you</string>
+    <string name="mic_test_start">Start</string>
+    <string name="mic_test_stop">Stop</string>
+    <string name="mic_selected">Selected: %s</string>
+    <string name="mic_test_idle_input">Input: shown once recording starts</string>
+    <string name="mic_test_input">Input: %s</string>
+    <string name="mic_test_hint">Tap Start, say a sentence, then tap Stop. Nothing is sent to the PC</string>
+    <string name="mic_test_needs_13">The mic test needs Android 13 or newer, like monologue mode</string>
+    <string name="mic_test_busy">The walkie is recording or a call is on. Try again afterwards</string>
+    <string name="mic_test_speak">Say something…</string>
+    <string name="mic_test_sound">Sound detected. Waiting for words…</string>
+    <string name="mic_test_heard">Heard: %s</string>
+    <string name="mic_test_ok">✓ Speech recognised on this mic</string>
+    <string name="mic_test_sound_only">Sound was picked up, but no words were recognised. Speak closer or clearer</string>
+    <string name="mic_test_silent">No sound picked up. Check the mic choice in Settings, or that the headset is connected</string>
+    <string name="mic_dev_phone">Phone mic</string>
+    <string name="mic_dev_wired">Wired headset</string>
+    <string name="mic_dev_usb">USB headset</string>
+    <string name="mic_dev_bluetooth">Bluetooth headset</string>
+    <string name="mic_dev_other">Other input</string>
+    <string name="mic_dev_unknown">unknown</string>
 </resources>

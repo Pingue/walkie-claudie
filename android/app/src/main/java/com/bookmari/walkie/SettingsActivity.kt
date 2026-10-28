@@ -82,6 +82,7 @@ class SettingsActivity : Activity() {
         }
 
         title(R.string.sec_check)
+        row(getString(R.string.mic_test), getString(R.string.mic_test_sub), action(R.string.open)) { startActivity(Intent(this, MicTestActivity::class.java)) }
         row(getString(R.string.button_test), getString(R.string.button_test_sub), action(R.string.open)) { startActivity(Intent(this, ButtonTestActivity::class.java)) }
         menu.addView(lcdText(11f).apply { text = getString(R.string.app_version, BuildConfig.BUILD); alpha = 0.5f }, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dpi(10) })
     }

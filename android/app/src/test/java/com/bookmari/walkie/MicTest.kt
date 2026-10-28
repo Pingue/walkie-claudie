@@ -30,6 +30,15 @@ class MicTest {
         assertEquals(false, Mic.isBluetooth(builtin))
     }
 
+    @Test fun deviceTypesGetReadableLabels() {
+        assertEquals(R.string.mic_dev_phone, Mic.typeLabel(builtin))
+        assertEquals(R.string.mic_dev_wired, Mic.typeLabel(wired))
+        assertEquals(R.string.mic_dev_usb, Mic.typeLabel(AudioDeviceInfo.TYPE_USB_HEADSET))
+        assertEquals(R.string.mic_dev_bluetooth, Mic.typeLabel(sco))
+        assertEquals(R.string.mic_dev_bluetooth, Mic.typeLabel(AudioDeviceInfo.TYPE_BLE_HEADSET))
+        assertEquals(R.string.mic_dev_other, Mic.typeLabel(AudioDeviceInfo.TYPE_TELEPHONY))
+    }
+
     @Test fun nextCyclesThroughAllChoices() {
         assertEquals(Mic.PHONE, Mic.next(Mic.AUTO))
         assertEquals(Mic.HEADSET, Mic.next(Mic.PHONE))
