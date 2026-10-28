@@ -55,6 +55,15 @@ object Channels {
         return (first until first + COUNT).filter { p.contains("name-$it") || it == port(ctx) }
     }
 
+    /** The channel after [current] in [ports], wrapping round; null when there is no other one. */
+    fun nextPort(ports: List<Int>, current: Int): Int? {
+        val others = ports.distinct().filter { it != current }.sorted()
+        return others.firstOrNull { it > current } ?: others.firstOrNull()
+    }
+
+    /** Channels that answered the last scan, else the ones seen before. */
+    fun openPorts(ctx: Context): List<Int> = live?.takeIf { it.isNotEmpty() } ?: known(ctx)
+
     /** Asks every channel port at once; returns the ports that answer, saving their names. Blocking: not on the main thread. */
     fun scan(ctx: Context): List<Int> {
         val p = prefs(ctx)

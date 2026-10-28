@@ -51,6 +51,8 @@ class SettingsActivity : Activity() {
         switch(R.string.trig_volume, R.string.trig_volume_sub, WalkieService.VOLUME, true) { if (!a11yOn()) a11yGuide() }
         if (prefs.getBoolean(WalkieService.VOLUME, true) && !a11yOn())
             row(R.string.a11y_off, getString(R.string.a11y_off_sub), action(R.string.how)) { a11yGuide() }
+        volumeAction(up = false)
+        volumeAction(up = true)
         switch(R.string.trig_volume_off, R.string.trig_volume_off_sub, WalkieService.VOLUME_OFF, false)
         // The earphone button is taken back by long-pressing the floating button, so each line says what the other allows.
         val floating = prefs.getBoolean(WalkieService.FLOATING, true)
@@ -90,6 +92,24 @@ class SettingsActivity : Activity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (grantResults.firstOrNull() == PackageManager.PERMISSION_DENIED) Toast.makeText(this, R.string.mic_bt_denied, Toast.LENGTH_LONG).show()
+    }
+
+    /** What a volume key does: talk toggle, talk hold, next channel, monologue, or just the volume. */
+    private fun volumeAction(up: Boolean) {
+        val pref = if (up) VolumeKeys.PREF_UP else VolumeKeys.PREF_DOWN
+        val current = VolumeKeys.parse(prefs.getString(pref, null))
+        val label = if (up) R.string.vol_up else R.string.vol_down
+        row(label, getString(R.string.vol_action_sub, getString(VolumeKeys.label(current, up))), action(R.string.change)) {
+            val acts = VolumeKeys.Act.values()
+            AlertDialog.Builder(this)
+                .setTitle(label)
+                .setSingleChoiceItems(acts.map { getString(VolumeKeys.label(it, up)) }.toTypedArray(), acts.indexOf(current)) { d, i ->
+                    d.dismiss()
+                    save { putString(pref, acts[i].id) }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
     }
 
     private fun title(label: Int) = menu.menuTitle(getString(label))
