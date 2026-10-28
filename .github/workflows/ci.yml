@@ -23,6 +23,22 @@ jobs:
         working-directory: plugin
       - run: bun test
         working-directory: plugin
+      - name: Release script tests
+        run: bun test tools/
+
+  pr-title:
+    name: Conventional PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      # Releases are derived from commit messages, so a squash-merged PR title must be a conventional commit.
+      - env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if ! echo "$TITLE" | grep -Eq '^(feat|fix|perf|revert|docs|style|refactor|test|build|ci|chore)(\([^)]+\))?!?: .+'; then
+            echo "PR title must look like 'feat: add thing' or 'fix(mic): handle X' (got: $TITLE)"
+            exit 1
+          fi
 
   android-tests:
     name: Android unit tests
