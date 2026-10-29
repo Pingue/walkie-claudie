@@ -129,6 +129,7 @@ class WalkieService : Service() {
         if (prefs.getBoolean(FLOATING, true) && Settings.canDrawOverlays(this)) addButton() // the in-app talk button works regardless
         addEarphone()
         instance = this
+        WearLink.push(this, WearLink.IDLE)
         // A call that starts mid-reply or mid-recording wins: stop both.
         if (android.os.Build.VERSION.SDK_INT >= 31) getSystemService(AudioManager::class.java)
             .addOnModeChangedListener(mainExecutor, modeListener)
@@ -162,6 +163,7 @@ class WalkieService : Service() {
         if (android.os.Build.VERSION.SDK_INT >= 31) getSystemService(AudioManager::class.java)
             .removeOnModeChangedListener(modeListener)
         instance = null
+        WearLink.push(this, WearLink.OFF)
         running = false
         session?.release()
         recognizer?.destroy()
@@ -246,6 +248,7 @@ class WalkieService : Service() {
 
     private fun setListening(on: Boolean) {
         Talk.listening = on
+        WearLink.push(this, if (on) WearLink.REC else WearLink.IDLE)
         if (!on) { Talk.hold = false; Talk.partial = "" }
         Talk.refresh()
         if (::button.isInitialized) { (button.background as KeyDrawable).face = if (on) Ui.LED_REC else Ui.KEY; showLed() }

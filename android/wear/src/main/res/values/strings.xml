@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Walkie</string>
+    <string name="talk">TALK</string>
+    <string name="stop">STOP</string>
+    <string name="off">Start the walkie on the phone</string>
+    <string name="no_phone">No phone</string>
+</resources>
