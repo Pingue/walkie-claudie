@@ -6,15 +6,27 @@ updates:
       interval: weekly
     commit-message:
       prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
   - package-ecosystem: gradle
     directory: /android
     schedule:
       interval: weekly
     commit-message:
       prefix: "build"
+    groups:
+      gradle:
+        patterns:
+          - "*"
   - package-ecosystem: bun
     directory: /plugin
     schedule:
       interval: weekly
     commit-message:
       prefix: "build"
+    groups:
+      bun:
+        patterns:
+          - "*"
