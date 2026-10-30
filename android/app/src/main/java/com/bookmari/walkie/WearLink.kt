@@ -12,6 +12,7 @@ import com.google.android.gms.wearable.WearableListenerService
 /** The paired watch's remote talk key. Paths and states are duplicated in the :wear module (TalkActivity). */
 object WearLink {
     const val TALK = "/walkie/talk" // watch -> phone: same as pressing the talk key
+    const val MONOLOGUE = "/walkie/monologue" // watch -> phone: a long press, same as the volume-up hold: starts or ends a monologue
     const val STATE = "/walkie/state" // phone -> watch: a data item, so a watch that opens later still sees it
     const val OFF = "off" // the walkie service is not running
     const val IDLE = "idle"
@@ -28,10 +29,15 @@ object WearLink {
 
 class WearListener : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
-        if (event.path != WearLink.TALK) return
+        val monologue = when (event.path) {
+            WearLink.TALK -> false
+            WearLink.MONOLOGUE -> true
+            else -> return
+        }
         // Android 14 refuses to start a microphone service from the background, so a tap only works while the walkie is on.
         Handler(Looper.getMainLooper()).post {
-            WalkieService.instance?.talkToggle() ?: WearLink.push(this, WearLink.OFF)
+            val walkie = WalkieService.instance ?: return@post WearLink.push(this, WearLink.OFF)
+            if (monologue) walkie.monologue() else walkie.talkToggle()
         }
     }
 }
