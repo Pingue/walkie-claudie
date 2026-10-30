@@ -5,4 +5,10 @@
     <string name="stop">STOP</string>
     <string name="off">Start the walkie on the phone</string>
     <string name="no_phone">No phone</string>
+    <string name="next_channel">NEXT CH</string>
+    <string name="settings">SETTINGS</string>
+    <string name="swipe_title">Swipe to talk</string>
+    <string name="swipe_on">ON</string>
+    <string name="swipe_off">OFF</string>
+    <string name="swipe_hint">On: taps and holds on the button are ignored; swipe right to talk or stop</string>
 </resources>

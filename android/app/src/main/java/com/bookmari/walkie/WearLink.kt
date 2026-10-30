@@ -13,6 +13,7 @@ import com.google.android.gms.wearable.WearableListenerService
 object WearLink {
     const val TALK = "/walkie/talk" // watch -> phone: same as pressing the talk key
     const val MONOLOGUE = "/walkie/monologue" // watch -> phone: a long press, same as the volume-up hold: starts or ends a monologue
+    const val NEXT = "/walkie/next" // watch -> phone: next open channel, read out loud
     const val STATE = "/walkie/state" // phone -> watch: a data item, so a watch that opens later still sees it
     const val OFF = "off" // the walkie service is not running
     const val IDLE = "idle"
@@ -29,15 +30,15 @@ object WearLink {
 
 class WearListener : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
-        val monologue = when (event.path) {
-            WearLink.TALK -> false
-            WearLink.MONOLOGUE -> true
-            else -> return
-        }
+        if (event.path !in setOf(WearLink.TALK, WearLink.MONOLOGUE, WearLink.NEXT)) return
         // Android 14 refuses to start a microphone service from the background, so a tap only works while the walkie is on.
         Handler(Looper.getMainLooper()).post {
             val walkie = WalkieService.instance ?: return@post WearLink.push(this, WearLink.OFF)
-            if (monologue) walkie.monologue() else walkie.talkToggle()
+            when (event.path) {
+                WearLink.MONOLOGUE -> walkie.monologue()
+                WearLink.NEXT -> walkie.nextChannel()
+                else -> walkie.talkToggle()
+            }
         }
     }
 }
