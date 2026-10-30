@@ -66,6 +66,7 @@ Putting those four together, the plan became: vibe code with my mouth and ears w
    - Without `WALKIE_ENABLE=1`, the plugin opens no port and no tools in that session
    - To keep an existing conversation: quit that session, then run the command above with `--continue` (latest conversation) or `--resume` (pick one)
 3. Install the app APK on the phone ([Releases](../../releases) or "Build / develop" below)
+   - Optional, for a Wear OS watch (tested target: Pixel Watch): also install `walkie-claudie-wear-*.apk` from the same release on the watch with `adb` over Wi-Fi debugging. It is a remote talk button (tap to toggle) and needs the walkie running on the phone. Use the phone and watch APKs from the same release: they must be signed with the same key
    - Google Play Protect may block it, since it doesn't come from the Play Store. If it does:
      1. In the warning, tap "More details" → "Install anyway"
      2. Still blocked: Play Store › profile › Play Protect › Settings (gear) › turn off "Scan apps with Play Protect" → install the APK → turn it back on in the same place
