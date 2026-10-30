@@ -17,11 +17,12 @@ import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 
-/** One big button: a tap is the phone's talk key (toggle). The colour follows what the phone is doing. */
+/** One big button: a tap is the phone's talk key (toggle), a long press starts or ends a monologue. The colour follows what the phone is doing. */
 class TalkActivity : Activity(), DataClient.OnDataChangedListener {
     // Same paths and states as the phone's WearLink.kt.
     private companion object {
         const val TALK = "/walkie/talk"
+        const val MONOLOGUE = "/walkie/monologue"
         const val STATE = "/walkie/state"
         const val OFF = "off"
         const val REC = "rec"
@@ -40,7 +41,8 @@ class TalkActivity : Activity(), DataClient.OnDataChangedListener {
             gravity = Gravity.CENTER
             textSize = 22f
             setTextColor(Color.WHITE)
-            setOnClickListener { tap(it) }
+            setOnClickListener { send(it, TALK, HapticFeedbackConstants.CONTEXT_CLICK) }
+            setOnLongClickListener { send(it, MONOLOGUE, HapticFeedbackConstants.LONG_PRESS); true } // true: no click on release
         }
         val pad = (resources.displayMetrics.density * 14).toInt() // keeps the circle clear of a round bezel
         setContentView(FrameLayout(this).apply {
@@ -70,12 +72,12 @@ class TalkActivity : Activity(), DataClient.OnDataChangedListener {
             show(DataMapItem.fromDataItem(e.dataItem).dataMap.getString("state") ?: OFF)
     }
 
-    private fun tap(v: android.view.View) {
-        v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+    private fun send(v: android.view.View, path: String, haptic: Int) {
+        v.performHapticFeedback(haptic)
         Wearable.getNodeClient(this).connectedNodes.addOnSuccessListener { nodes ->
             if (nodes.isEmpty()) return@addOnSuccessListener show(null)
             val messages = Wearable.getMessageClient(this)
-            nodes.forEach { messages.sendMessage(it.id, TALK, ByteArray(0)) } // the paired phone, in practice the only node
+            nodes.forEach { messages.sendMessage(it.id, path, ByteArray(0)) } // the paired phone, in practice the only node
         }.addOnFailureListener { show(null) }
     }
 
