@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The talk screen swipes right to talk, so a right swipe must not also close the app (the crown or button still leaves it). -->
+    <style name="Walkie" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowSwipeToDismiss">false</item>
+    </style>
+</resources>
