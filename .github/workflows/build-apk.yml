@@ -92,14 +92,18 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: walkie-claudie-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/wear/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         if: steps.release.outputs.built == 'true'
         with:
           name: walkie-claudie-release-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/wear/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
       - name: Tag and publish the release
@@ -108,8 +112,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
         run: |
-          if [ "${{ steps.release.outputs.built }}" = "true" ]; then src=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
-          else src=$(ls android/app/build/outputs/apk/debug/*.apk | head -1); fi # unsigned: the debug-signed APK
+          # Signed if the secrets were set, else the debug-signed APKs. Phone and watch must share one key, so never mix the two.
+          if [ "${{ steps.release.outputs.built }}" = "true" ]; then variant=release; else variant=debug; fi
           apk="walkie-claudie-$TAG.apk"
-          cp "$src" "$apk"
-          gh release create "$TAG" "$apk" --target "$GITHUB_SHA" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+          wear="walkie-claudie-wear-$TAG.apk"
+          cp "$(ls android/app/build/outputs/apk/$variant/*.apk | head -1)" "$apk"
+          cp "$(ls android/wear/build/outputs/apk/$variant/*.apk | head -1)" "$wear"
+          gh release create "$TAG" "$apk" "$wear" --target "$GITHUB_SHA" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
