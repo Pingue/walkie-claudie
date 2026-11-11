@@ -51,7 +51,7 @@ Putting those four together, the plan became: vibe code with my mouth and ears w
 
 1. In a terminal, install the plugin on the PC
    ```sh
-   claude plugin marketplace add ahn4jang27/walkie-claudie
+   claude plugin marketplace add pingue/walkie-claudie
    claude plugin install walkie@walkie-claudie
    ```
 2. In a terminal, start a new Claude Code session with `WALKIE_ENABLE=1`
