@@ -21,17 +21,17 @@ jobs:
     permissions:
       contents: write # create the tag and release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # tags and full history for the version
       - uses: oven-sh/setup-bun@v2
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
       - name: Accept Android SDK licenses # the runner image already has the SDK
         run: yes | "$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | tail -1)" --licenses > /dev/null || true
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Work out the version
         id: version
@@ -89,7 +89,7 @@ jobs:
           echo "built=true" >> "$GITHUB_OUTPUT"
         working-directory: android
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: walkie-claudie-debug-apk
           path: |
@@ -97,7 +97,7 @@ jobs:
             android/wear/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.release.outputs.built == 'true'
         with:
           name: walkie-claudie-release-apk
