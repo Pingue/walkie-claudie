@@ -4,7 +4,6 @@ import java.time.format.DateTimeFormatter
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -51,10 +50,6 @@ android {
     buildFeatures {
         buildConfig = true
     }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
 dependencies {
@@ -62,8 +57,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
 
     // Receives the Pixel Watch remote's talk taps (WearLink.kt) and tells it when we are recording.
-    implementation("com.google.android.gms:play-services-wearable:18.2.0")
+    implementation("com.google.android.gms:play-services-wearable:20.0.1")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.json:json:20240303") // the android.jar stubs of org.json throw in unit tests
+    testImplementation("org.json:json:20260814") // the android.jar stubs of org.json throw in unit tests
 }
